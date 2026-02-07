@@ -1,14 +1,9 @@
 :root {
     --bg-color: #fdf6e3;
-    /* 優しいクリーム色 */
     --accent-color: #ff8c00;
-    /* とっとりVOICEっぽいオレンジ */
     --text-color: #5d4037;
-    /* 濃い茶色 */
     --ui-bg: rgba(255, 255, 255, 0.95);
     --header-height: 80px;
-    --footer-height: 80px;
-    /* スマホ用進化リストの高さ */
 }
 
 * {
@@ -31,7 +26,7 @@ body {
     align-items: center;
 }
 
-/* 全体を包むラッパー（PCでの横並び用） */
+/* ラッパー */
 .app-wrapper {
     display: flex;
     justify-content: center;
@@ -108,16 +103,128 @@ body {
     object-fit: cover;
 }
 
-/* キャンバスコンテナ */
+/* キャンバス */
 #canvas-container {
     flex: 1;
     position: relative;
     background: linear-gradient(180deg, #e0f7fa 0%, #fff8e1 100%);
     overflow: hidden;
     cursor: pointer;
-    /* タッチ操作の遅延防止 */
     touch-action: none;
 }
+
+/* タイトル画面オーバーレイ */
+#title-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 200;
+    transition: opacity 0.3s ease;
+}
+
+#title-screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.title-content {
+    text-align: center;
+    width: 90%;
+    max-width: 350px;
+}
+
+.sub-title {
+    font-size: 14px;
+    color: #8d6e63;
+    margin: 0;
+}
+
+.main-title {
+    font-size: 36px;
+    color: var(--accent-color);
+    margin: 5px 0 30px;
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 0 rgba(255, 200, 0, 0.3);
+}
+
+/* ミッションリスト（タイトル用） */
+.mission-box {
+    background: #fff;
+    border: 2px dashed #ddd;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+.mission-label {
+    font-weight: bold;
+    color: #555;
+    margin: 0 0 10px;
+    font-size: 14px;
+    text-align: center;
+}
+
+#mission-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.mission-item {
+    font-size: 14px;
+    padding: 5px 0;
+    color: #666;
+    display: flex;
+    align-items: center;
+}
+
+.mission-item.cleared {
+    color: var(--accent-color);
+    font-weight: bold;
+}
+
+/* スタートボタン */
+.pulse-btn {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    font-size: 20px;
+    border-radius: 50px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(255, 140, 0, 0.4);
+    animation: pulse 1.5s infinite;
+}
+
+.pulse-btn:active {
+    transform: scale(0.95);
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 140, 0, 0.7);
+    }
+
+    70% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 10px rgba(255, 140, 0, 0);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 140, 0, 0);
+    }
+}
+
 
 /* 進化リストエリア */
 #evolution-container {
@@ -129,11 +236,8 @@ body {
     flex-direction: column;
     /* PC初期設定 */
     width: 200px;
-    /* 幅は維持 */
     height: auto;
-    /* 高さは自動縮小 */
     max-height: 100%;
-    /* 画面からはみ出さない */
     overflow-y: auto;
 }
 
@@ -150,7 +254,6 @@ body {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    /* アイテム間隔を狭める */
 }
 
 .evo-item {
@@ -158,7 +261,6 @@ body {
     align-items: center;
     gap: 8px;
     padding: 4px;
-    /* パディング縮小 */
     background: #fff;
     border-radius: 6px;
     border: 1px solid #eee;
@@ -166,7 +268,6 @@ body {
 
 .evo-img {
     width: 28px;
-    /* 画像サイズ縮小 */
     height: 28px;
     border-radius: 50%;
     border: 1px solid #ddd;
@@ -186,18 +287,8 @@ body {
 
 .evo-info {
     font-size: 10px;
-    /* フォントサイズ縮小 */
     color: #666;
     line-height: 1.2;
-}
-
-.evo-arrow {
-    text-align: center;
-    color: #ccc;
-    font-size: 10px;
-    line-height: 0.5;
-    margin: -2px 0;
-    /* 矢印の上下マージンを詰める */
 }
 
 /* ゲームオーバー画面 */
@@ -230,7 +321,6 @@ body {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     width: 80%;
     max-width: 300px;
-    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .overlay-content h2 {
@@ -245,6 +335,13 @@ body {
     color: var(--accent-color);
 }
 
+.btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+
 #retry-btn {
     background: var(--accent-color);
     color: white;
@@ -253,25 +350,73 @@ body {
     font-size: 16px;
     border-radius: 50px;
     cursor: pointer;
-    margin-top: 15px;
+    font-weight: bold;
 }
 
-@keyframes popIn {
-    from {
-        transform: scale(0.8);
+.secondary-btn {
+    background: #fff;
+    color: #999;
+    border: 1px solid #ddd;
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 50px;
+    cursor: pointer;
+}
+
+/* 通知トースト */
+#toast-container {
+    position: absolute;
+    top: 60px;
+    /* ヘッダーの下 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+    z-index: 300;
+}
+
+.toast {
+    background: rgba(40, 40, 40, 0.9);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 30px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    animation: toastFade 3s forwards;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+@keyframes toastFade {
+    0% {
         opacity: 0;
+        transform: translateY(-20px);
     }
 
-    to {
-        transform: scale(1);
+    10% {
         opacity: 1;
+        transform: translateY(0);
+    }
+
+    90% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-20px);
     }
 }
 
-/* --- レスポンシブ対応 (スマホ・タブレット縦) --- */
+/* --- スマホ対応 --- */
 @media (max-width: 768px) {
     body {
-        /* スマホではスクロール禁止をより厳密に */
         position: fixed;
         width: 100%;
         height: 100%;
@@ -286,8 +431,7 @@ body {
     }
 
     #game-container {
-        /* リストの分だけ高さを減らす */
-        height: calc(100% - var(--footer-height));
+        height: calc(100% - 60px);
         width: 100%;
         max-width: 100%;
         border-radius: 0;
@@ -298,29 +442,24 @@ body {
     #evolution-container {
         width: 100%;
         height: 60px;
-        /* 高さを縮小 (80px -> 60px) */
         flex-direction: row;
         overflow-y: hidden;
         overflow-x: auto;
-        /* 横スクロール */
         padding: 5px 10px;
         border-radius: 0;
         border-top: 2px solid #eee;
         background: #fff;
         align-items: center;
         gap: 5px;
-        /* ギャップを詰める */
     }
 
     #evolution-container h3 {
         display: none;
-        /* スマホではタイトル非表示 */
     }
 
     .evo-list {
         flex-direction: row;
         gap: 2px;
-        /* リスト間隔を極限まで詰める */
         height: 100%;
         align-items: center;
     }
@@ -329,7 +468,6 @@ body {
         flex-direction: column;
         padding: 0;
         min-width: auto;
-        /* 幅制限解除 */
         border: none;
         background: transparent;
         gap: 0;
@@ -337,25 +475,15 @@ body {
 
     .evo-img {
         width: 28px;
-        /* 少し小さく */
         height: 28px;
         border: 1px solid #ccc;
     }
 
     .evo-info {
         font-size: 8px;
-        /* 極小フォント */
         transform: scale(0.9);
-        /* さらに小さく */
         white-space: nowrap;
     }
 
-    .evo-arrow {
-        transform: rotate(-90deg);
-        /* 下向き▼を右向き▶に回転 */
-        font-size: 10px;
-        display: block;
-        color: #ddd;
-        margin: 0 2px;
-    }
+    /* 矢印は削除されたので記述なし */
 }

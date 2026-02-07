@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>とっとりVOICE スイカゲーム風</title>
+  <title>ゆいくんゲーム - とっとりVOICE</title>
   <link rel="stylesheet" href="style.css">
   <!-- Matter.js 物理エンジン -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
@@ -35,13 +35,34 @@
       <!-- ゲーム描画エリア -->
       <div id="canvas-container"></div>
 
+      <!-- 通知トースト -->
+      <div id="toast-container"></div>
+
+      <!-- タイトル画面 -->
+      <div id="title-screen">
+        <div class="title-content">
+          <p class="sub-title">とっとりVOICE</p>
+          <h1 class="main-title">ゆいくんゲーム</h1>
+          <div class="mission-box">
+            <p class="mission-label">🎯 ミッション</p>
+            <ul id="mission-list">
+              <!-- JSで生成 -->
+            </ul>
+          </div>
+          <button id="start-btn" class="pulse-btn">ゲームスタート</button>
+          <!-- スピンオフやクレジットを入れるならここ -->
+        </div>
+      </div>
+
       <!-- ゲームオーバー画面 -->
       <div id="game-over-screen" class="hidden">
         <div class="overlay-content">
           <h2>GAME OVER</h2>
           <p>Score: <span id="final-score">0</span></p>
-          <button id="retry-btn">もう一度遊ぶ</button>
-          <p style="font-size:12px; margin-top:20px; color:#999;">クリック/タップでタイトルへ</p>
+          <div class="btn-group">
+            <button id="retry-btn">もう一度遊ぶ</button>
+            <button id="title-btn" class="secondary-btn">タイトルへ戻る</button>
+          </div>
         </div>
       </div>
     </div>

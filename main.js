@@ -10,11 +10,11 @@ const Engine = Matter.Engine,
 
 // ゲーム設定
 const CONFIG = {
-    wallThickness: 20, // 壁の厚さ
-    deadLineY: 150, // ゲームオーバーライン（上からの距離）
+    wallThickness: 20,
+    deadLineY: 150,
 };
 
-// キャラクターデータ（レベル定義）
+// キャラクターデータ
 const BALL_LEVELS = [
     { level: 1, radius: 22, score: 0, img: './画像/simple.png' },
     { level: 2, radius: 30, score: 2, img: './画像/fumufumu.jpeg' },
@@ -29,38 +29,52 @@ const BALL_LEVELS = [
     { level: 11, radius: 150, score: 1000, img: './画像/アイコン.png' },
 ];
 
+// ミッション定義
+const MISSIONS = [
+    { id: 'mission_100', text: '初めの一歩 (100pt)', check: (score, balls) => score >= 100 },
+    { id: 'mission_lv5', text: 'プチシンカ (Lv.5作成)', check: (score, balls) => balls.some(b => b.label.includes('ball_5')) },
+    { id: 'mission_500', text: '脱・初心者 (500pt)', check: (score, balls) => score >= 500 },
+    { id: 'mission_lv8', text: 'ベテラン (Lv.8作成)', check: (score, balls) => balls.some(b => b.label.includes('ball_8')) },
+    { id: 'mission_1500', text: '名人 (1500pt)', check: (score, balls) => score >= 1500 },
+    { id: 'mission_lv11', text: 'ゆいくんマスター (Lv.11作成)', check: (score, balls) => balls.some(b => b.label.includes('ball_11')) }
+];
+
 // ステート変数
 let engine, render, runner;
 let currentScore = 0;
-let nextBallLevel = 0; // 次に落ちるボールのインデックス (0~4)
+let nextBallLevel = 0;
 let isGameOver = false;
-let canDrop = true; // 連続投下防止フラグ
-let previewBall = null; // 落下位置ガイド用のボール（今回は簡易的に非表示の要素で管理）
-let gameOverTimer = 0; // デッドライン判定用タイマー
+let canDrop = true;
+let gameOverTimer = 0;
+let gameState = 'TITLE'; // TITLE, PLAYING, GAMEOVER
 
 // DOM要素
 const scoreEl = document.getElementById('score');
 const finalScoreEl = document.getElementById('final-score');
 const nextBallPreviewEl = document.getElementById('next-ball-preview');
 const gameOverScreen = document.getElementById('game-over-screen');
+const titleScreen = document.getElementById('title-screen');
 const retryBtn = document.getElementById('retry-btn');
+const titleBtn = document.getElementById('title-btn');
+const startBtn = document.getElementById('start-btn');
 const container = document.getElementById('canvas-container');
+const toastContainer = document.getElementById('toast-container');
+const missionListEl = document.getElementById('mission-list');
 
 // 初期化
 function init() {
     const width = container.clientWidth;
     const height = container.clientHeight;
 
-    // Matter.js エンジン作成
     engine = Engine.create();
 
-    // カスタム描画用のCanvas作成
+    // Canvas作成
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    container.innerHTML = ''; // クリア
+    container.innerHTML = '';
     container.appendChild(canvas);
 
-    // Retina対応（高解像度化）
+    // Retina対応
     const dpr = window.devicePixelRatio || 1;
     canvas.width = width * dpr;
     canvas.height = height * dpr;
@@ -68,67 +82,63 @@ function init() {
     canvas.style.height = `${height}px`;
     ctx.scale(dpr, dpr);
 
-    // 壁の作成
     createWalls(width, height);
-
-    // イベントリスナー設定
     setupEvents();
-
-    // 最初のNextボール設定
     setNextBall();
+    updateMissionDisplay(); // タイトル画面のミッションリスト更新
 
-    // ランナー作成と実行
+    // 描画ループ開始
+    startRenderLoop(ctx, width, height);
+
+    // Runner開始（物理演算）
     runner = Runner.create();
     Runner.run(runner, engine);
 
-    // 衝突検知
     Events.on(engine, 'collisionStart', handleCollision);
 
-    // 画像プリロード用キャッシュ
-    const imgCache = {};
+    // 画像プリロード
+    preloadImages();
+}
+
+const imgCache = {};
+function preloadImages() {
     BALL_LEVELS.forEach(b => {
         const img = new Image();
         img.src = b.img;
         imgCache[b.img] = img;
     });
+}
 
-    // カスタム描画ループ
+function startRenderLoop(ctx, width, height) {
     (function renderLoop() {
         const bodies = Composite.allBodies(engine.world);
 
-        // 背景クリア
         ctx.clearRect(0, 0, width, height);
 
-        // デッドライン描画（点線）
+        // デッドライン描画
         ctx.beginPath();
         ctx.moveTo(0, CONFIG.deadLineY);
         ctx.lineTo(width, CONFIG.deadLineY);
-        // 赤色、点線
         if (gameOverTimer > 0) {
-            // 警告中は太く
             ctx.lineWidth = 4;
-            ctx.strokeStyle = `rgba(255, 0, 0, ${0.5 + Math.sin(Date.now() / 100) * 0.5})`; // 点滅
+            ctx.strokeStyle = `rgba(255, 0, 0, ${0.5 + Math.sin(Date.now() / 100) * 0.5})`;
         } else {
             ctx.lineWidth = 2;
             ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
         }
         ctx.setLineDash([10, 10]);
         ctx.stroke();
-        ctx.setLineDash([]); // 点線リセット
+        ctx.setLineDash([]);
 
-        // ボディの描画
+        // ボディ描画
         for (let i = 0; i < bodies.length; i += 1) {
             const body = bodies[i];
-
-            if (body.render.visible === false) {
-                continue;
-            }
+            if (body.render.visible === false) continue;
 
             ctx.save();
             ctx.translate(body.position.x, body.position.y);
             ctx.rotate(body.angle);
 
-            // 壁（四角形）の描画
             if (!body.label.startsWith('ball_')) {
                 ctx.beginPath();
                 const vertices = body.vertices;
@@ -139,48 +149,36 @@ function init() {
                 ctx.closePath();
                 ctx.fillStyle = body.render.fillStyle;
                 ctx.fill();
-            }
-            // ボール（円形・画像）の描画
-            else {
+            } else {
                 const r = body.circleRadius;
                 const sprite = body.render.sprite;
 
-                // 丸く切り抜くためのパス
                 ctx.beginPath();
                 ctx.arc(0, 0, r, 0, 2 * Math.PI);
                 ctx.closePath();
-
                 ctx.save();
-                ctx.clip(); // 切り抜き実行
+                ctx.clip();
 
-                // ★ここで白背景を描く（透過PNG対策）
                 ctx.fillStyle = '#ffffff';
                 ctx.fill();
 
                 if (sprite && sprite.texture) {
                     const img = imgCache[sprite.texture];
                     if (img && img.complete && img.naturalWidth !== 0) {
-                        // 画像描画
                         const w = img.width * sprite.xScale;
                         const h = img.height * sprite.yScale;
                         ctx.drawImage(img, -w / 2, -h / 2, w, h);
                     } else {
-                        // 画像ロード前
                         ctx.fillStyle = '#ffecb3';
                         ctx.fill();
                     }
-                } else {
-                    ctx.fillStyle = '#ffecb3';
-                    ctx.fill();
                 }
-                ctx.restore(); // クリップ解除
+                ctx.restore();
 
-                // 枠線
                 ctx.strokeStyle = 'rgba(0,0,0,0.1)';
                 ctx.lineWidth = 1;
                 ctx.stroke();
             }
-
             ctx.restore();
         }
 
@@ -190,15 +188,12 @@ function init() {
     })();
 }
 
-// 壁の作成（U字型）
 function createWalls(width, height) {
     const ground = Bodies.rectangle(width / 2, height, width, CONFIG.wallThickness * 2, {
         isStatic: true,
         render: { fillStyle: '#8d6e63' }
     });
 
-    // 天井が高すぎるとボールが抜けることがあるので、壁を目一杯伸ばす
-    // スマホなど縦長画面に対応するためheightを基準に
     const wallHeight = height * 2;
 
     const leftWall = Bodies.rectangle(0, height / 2, CONFIG.wallThickness, wallHeight, {
@@ -214,9 +209,8 @@ function createWalls(width, height) {
     World.add(engine.world, [ground, leftWall, rightWall]);
 }
 
-// 衝突処理（進化）
 function handleCollision(event) {
-    if (isGameOver) return;
+    if (gameState !== 'PLAYING') return;
 
     const pairs = event.pairs;
 
@@ -251,7 +245,6 @@ function handleCollision(event) {
     }
 }
 
-// ボール生成関数
 function createBall(x, y, index, isSensor = false) {
     const ballData = BALL_LEVELS[index];
     if (!ballData) return;
@@ -273,7 +266,6 @@ function createBall(x, y, index, isSensor = false) {
         }
     });
 
-    // 画像サイズに合わせてスケールを更新
     const img = new Image();
     img.src = ballData.img;
     img.onload = () => {
@@ -281,7 +273,6 @@ function createBall(x, y, index, isSensor = false) {
         ball.render.sprite.xScale = scale;
         ball.render.sprite.yScale = scale;
     };
-
     if (img.complete && img.naturalWidth > 0) {
         const scale = (r * 2) / Math.max(img.width, img.height);
         ball.render.sprite.xScale = scale;
@@ -289,31 +280,26 @@ function createBall(x, y, index, isSensor = false) {
     }
 
     World.add(engine.world, ball);
+
+    // ボール生成時にもミッションチェック（Lv.11作成など）
+    setTimeout(checkMissions, 100);
+
     return ball;
 }
 
-// 次のボールを設定
 function setNextBall() {
     nextBallLevel = Math.floor(Math.random() * 5);
     const ballData = BALL_LEVELS[nextBallLevel];
     nextBallPreviewEl.innerHTML = `<img src="${ballData.img}" alt="Next">`;
 }
 
-// イベント設定
 function setupEvents() {
-    // Canvas領域以外でも反応しないように、ターゲットをcanvasに限定したいが
-    // タッチ判定を広くとるならcontainerイベントのままで。
-    // ただし進化リストのスクロールを阻害しないように注意が必要。
-
-    // PC
     container.addEventListener('mousedown', handleInput);
-
-    // Mobile: container内のtouchのみpreventDefaultする
-    // これにより進化リストのスクロールは生きる
     container.addEventListener('touchstart', handleInput, { passive: false });
 
+    startBtn.addEventListener('click', startGame);
     retryBtn.addEventListener('click', resetGame);
-    gameOverScreen.addEventListener('click', resetGame);
+    titleBtn.addEventListener('click', () => location.reload()); // タイトルへはリロード
 
     // 進化リスト生成
     generateEvolutionList();
@@ -322,10 +308,9 @@ function setupEvents() {
 function generateEvolutionList() {
     const listContainer = document.getElementById('evo-list-content');
     if (!listContainer) return;
-
     listContainer.innerHTML = '';
 
-    BALL_LEVELS.forEach((ball, index) => {
+    BALL_LEVELS.forEach((ball) => {
         const item = document.createElement('div');
         item.className = 'evo-item';
 
@@ -339,25 +324,17 @@ function generateEvolutionList() {
             </div>
         `;
         listContainer.appendChild(item);
-
-        // 矢印
-        if (index < BALL_LEVELS.length - 1) {
-            const arrowDiv = document.createElement('div');
-            arrowDiv.className = 'evo-arrow';
-            // PC版は縦並びなので下向き▼、スマホ版はCssで回転させて右向き▶にする
-            arrowDiv.innerHTML = '▼';
-            listContainer.appendChild(arrowDiv);
-        }
     });
-
-    // CSSでスマホ表示時に矢印の向きやレイアウトを変える想定
 }
 
+function startGame() {
+    titleScreen.classList.add('hidden');
+    gameState = 'PLAYING';
+}
 
 function handleInput(e) {
-    if (isGameOver || !canDrop) return;
+    if (gameState !== 'PLAYING' || isGameOver || !canDrop) return;
 
-    // ターゲットがコントロール類なら無視
     if (e.target.closest('button') || e.target.closest('#evolution-container')) return;
 
     e.preventDefault();
@@ -374,10 +351,7 @@ function handleInput(e) {
     const x = clientX - rect.left;
     const y = 50;
 
-    // クリック位置がコンテナ外（EvolutionListなど）を含む場合のY座標チェック
-    // container内イベントなのでxはcontainer内の相対座標になるが
-    // 一応範囲チェック
-
+    // 壁の判定
     const clampedX = Math.max(CONFIG.wallThickness + BALL_LEVELS[nextBallLevel].radius,
         Math.min(x, container.clientWidth - CONFIG.wallThickness - BALL_LEVELS[nextBallLevel].radius));
 
@@ -396,14 +370,58 @@ function dropBall(x, y) {
 function addScore(val) {
     currentScore += val;
     scoreEl.textContent = currentScore;
+    checkMissions();
+}
+
+function checkMissions() {
+    const stored = JSON.parse(localStorage.getItem('torivo_missions') || '{}');
+    const balls = Composite.allBodies(engine.world);
+    let updated = false;
+
+    MISSIONS.forEach(mission => {
+        if (!stored[mission.id]) {
+            if (mission.check(currentScore, balls)) {
+                stored[mission.id] = true;
+                showToast(`ミッション達成！ ${mission.text}`);
+                updated = true;
+            }
+        }
+    });
+
+    if (updated) {
+        localStorage.setItem('torivo_missions', JSON.stringify(stored));
+        updateMissionDisplay();
+    }
+}
+
+function showToast(msg) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = `<span>🎉</span><span>${msg}</span>`;
+    toastContainer.appendChild(toast);
+    setTimeout(() => {
+        toast.remove();
+    }, 3500);
+}
+
+function updateMissionDisplay() {
+    const stored = JSON.parse(localStorage.getItem('torivo_missions') || '{}');
+    missionListEl.innerHTML = '';
+
+    MISSIONS.forEach(m => {
+        const li = document.createElement('li');
+        li.className = 'mission-item' + (stored[m.id] ? ' cleared' : '');
+        li.innerHTML = stored[m.id] ? `✅ ${m.text}` : `⬜ ${m.text}`;
+        missionListEl.appendChild(li);
+    });
 }
 
 function resetGame() {
-    location.reload(); // Matter.jsのリセットが面倒なのでリロードで対応（ステート完全初期化）
-    /*
+    // リロードせずリセット
     const allBodies = Composite.allBodies(engine.world);
     const balls = allBodies.filter(b => b.label.startsWith('ball_'));
     World.remove(engine.world, balls);
+
     currentScore = 0;
     scoreEl.textContent = 0;
     isGameOver = false;
@@ -411,21 +429,18 @@ function resetGame() {
     gameOverScreen.classList.add('hidden');
     canDrop = true;
     setNextBall();
-    // 描画ループを再開する仕組みが必要（isGameOverで止めている場合）
-    */
+    gameState = 'PLAYING';
 }
 
-// ゲームオーバー判定（毎秒実行）
+// ゲームオーバー判定
 setInterval(() => {
-    if (isGameOver) return;
+    if (gameState !== 'PLAYING' || isGameOver) return;
 
     const balls = Composite.allBodies(engine.world).filter(b => b.label.startsWith('ball_'));
     let isDanger = false;
 
     for (let ball of balls) {
-        // デッドラインを超えているか
         if (ball.position.y < CONFIG.deadLineY) {
-            // かつ静止に近い状態
             if (Math.abs(ball.velocity.y) < 0.2 && Math.abs(ball.velocity.x) < 0.2) {
                 isDanger = true;
                 break;
@@ -434,22 +449,20 @@ setInterval(() => {
     }
 
     if (isDanger) {
-        gameOverTimer += 1; // 1秒経過
-        console.log("Danger count:", gameOverTimer);
-        if (gameOverTimer >= 3) { // 3秒続いたらアウト
+        gameOverTimer += 1;
+        if (gameOverTimer >= 3) {
             showGameOver();
         }
     } else {
-        gameOverTimer = 0; // 解消されたらリセット
+        gameOverTimer = 0;
     }
 }, 1000);
 
 function showGameOver() {
     isGameOver = true;
+    gameState = 'GAMEOVER';
     finalScoreEl.textContent = currentScore;
     gameOverScreen.classList.remove('hidden');
-    // 描画ループは requestAnimationFrame 内で isGameOver チェックして止まる
 }
 
-// 起動
 window.onload = init;
