@@ -139,22 +139,28 @@ body {
     max-width: 350px;
 }
 
+/* トップ画像のスタイル調整 */
 .title-img {
     width: 100%;
-    max-width: 280px;
-    /* 画像サイズ調整 */
+    max-width: 300px;
+    /* 適切なサイズ制限 */
     height: auto;
-    margin-bottom: 10px;
-    border-radius: 10px;
-    /* 角丸にする */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    object-fit: contain;
+    margin-bottom: 15px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.sub-title {
+    font-size: 14px;
+    color: #8d6e63;
+    margin: 0;
 }
 
 .main-title {
     font-size: 32px;
-    /* 少し小さく調整 */
     color: var(--accent-color);
-    margin: 5px 0 20px;
+    margin: 5px 0 25px;
     letter-spacing: 2px;
     text-shadow: 2px 2px 0 rgba(255, 200, 0, 0.3);
 }
@@ -240,7 +246,6 @@ body {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
     display: flex;
     flex-direction: column;
-    /* PC初期設定 */
     width: 200px;
     height: auto;
     max-height: 100%;
@@ -490,6 +495,4 @@ body {
         transform: scale(0.9);
         white-space: nowrap;
     }
-
-    /* 矢印は削除されたので記述なし */
 }
