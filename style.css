@@ -139,16 +139,22 @@ body {
     max-width: 350px;
 }
 
-.sub-title {
-    font-size: 14px;
-    color: #8d6e63;
-    margin: 0;
+.title-img {
+    width: 100%;
+    max-width: 280px;
+    /* 画像サイズ調整 */
+    height: auto;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    /* 角丸にする */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .main-title {
-    font-size: 36px;
+    font-size: 32px;
+    /* 少し小さく調整 */
     color: var(--accent-color);
-    margin: 5px 0 30px;
+    margin: 5px 0 20px;
     letter-spacing: 2px;
     text-shadow: 2px 2px 0 rgba(255, 200, 0, 0.3);
 }
