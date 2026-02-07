@@ -11,7 +11,7 @@ const Engine = Matter.Engine,
 // ゲーム設定
 const CONFIG = {
     wallThickness: 20,
-    deadLineY: 150,
+    deadLineY: 120, // ラインを上げて猶予を増やす (150 -> 120)
 };
 
 // キャラクターデータ
@@ -36,7 +36,7 @@ const MISSIONS = [
     { id: 'mission_500', text: '脱・初心者 (500pt)', check: (score, balls) => score >= 500 },
     { id: 'mission_lv8', text: 'ベテラン (Lv.8作成)', check: (score, balls) => balls.some(b => b.label.includes('ball_8')) },
     { id: 'mission_1500', text: '名人 (1500pt)', check: (score, balls) => score >= 1500 },
-    { id: 'mission_lv11', text: 'ゆいくんマスター (Lv.11作成)', check: (score, balls) => balls.some(b => b.label.includes('ball_11')) }
+    { id: 'mission_lv11', text: 'GAME CLEAR (Lv.11作成)', check: (score, balls) => balls.some(b => b.label.includes('ball_11')) }
 ];
 
 // ステート変数
