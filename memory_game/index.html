@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>ゆいくんの神経衰弱 - とっとりVOICE</title>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap"
+        rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+</head>
+
+<body>
+    <header class="game-header">
+        <a href="../index.html" class="back-link">
+            <span style="font-size: 1.5rem;">🏠</span> TOPへ
+        </a>
+        <h1 class="game-title">ゆいくんの神経衰弱</h1>
+    </header>
+
+    <main class="game-container">
+        <!-- 難易度選択画面 -->
+        <div id="difficulty-screen" class="screen active">
+            <h2>難易度を選んでね！</h2>
+            <div class="difficulty-buttons">
+                <button class="diff-btn" data-level="easy" data-pairs="4">
+                    <span class="diff-icon">🌱</span>
+                    初級
+                    <span class="diff-desc">8枚 (4ペア)</span>
+                </button>
+                <button class="diff-btn" data-level="normal" data-pairs="8">
+                    <span class="diff-icon">🌿</span>
+                    中級
+                    <span class="diff-desc">16枚 (8ペア)</span>
+                </button>
+                <button class="diff-btn" data-level="hard" data-pairs="12">
+                    <span class="diff-icon">🌳</span>
+                    上級
+                    <span class="diff-desc">24枚 (12ペア)</span>
+                </button>
+            </div>
+
+        </div>
+
+        <!-- ゲームプレイ画面 -->
+        <div id="game-screen" class="screen">
+            <div class="game-info">
+                <div class="timer">⏱ <span id="time-display">00:00</span></div>
+                <div class="score">残りペア: <span id="pairs-left">0</span></div>
+            </div>
+
+            <div id="card-grid" class="card-grid">
+                <!-- カードはJSで生成 -->
+            </div>
+
+            <button id="give-up-btn" class="secondary-btn">やりなおす</button>
+        </div>
+
+        <!-- 結果画面 -->
+        <div id="result-screen" class="screen">
+            <div class="result-box">
+                <h2>🎉 クリア！ 🎉</h2>
+                <div class="result-stats">
+                    <p>タイム: <span id="final-time" class="highlight">00:00</span></p>
+                    <p>ミス回数: <span id="miss-count">0</span>回</p>
+                </div>
+                <div class="rank-badge" id="rank-badge">
+                    <!-- S, A, B, Cなどのランクを表示 -->
+                </div>
+                <div class="action-buttons">
+                    <button id="retry-btn" class="primary-btn">もう一度遊ぶ</button>
+                    <a href="../index.html" class="secondary-btn">ゲームパークへ戻る</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

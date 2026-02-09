@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ゆかりんの理不尽かわいげゲーム</title>
+    <link rel="stylesheet" href="scroller.css">
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div id="game-container">
+        <!-- UI Layer -->
+        <div id="ui-layer">
+            <div id="score-board">TIME: <span id="time-display">0</span></div>
+            <div id="start-screen" class="screen">
+                <h1>ゆかりんの<br>理不尽ゲーム</h1>
+                <p>タップしてスタート！</p>
+            </div>
+            <div id="game-over-screen" class="screen hidden">
+                <h1>GAME OVER</h1>
+                <p id="game-over-reason"></p>
+                <button id="retry-btn">もう一度</button>
+            </div>
+            <div id="clear-screen" class="screen hidden">
+                <h1>SCENE CLEAR!</h1>
+                <p>次のステージへ...</p>
+            </div>
+        </div>
+
+        <!-- Game World -->
+        <div id="world">
+            <div id="sky"></div>
+            <div id="ground"></div>
+
+            <!-- Character -->
+            <div id="player" class="character">
+                <!-- Using the 3-view image as the sprite. We'll adjust via CSS mask/position later -->
+                <div class="sprite"></div>
+            </div>
+
+            <!-- Enemy (Crab) -->
+            <div id="enemy-crab" class="enemy hidden">
+                <div class="crab-sprite">🦀</div>
+            </div>
+
+            <!-- Obstacles Container -->
+            <div id="obstacles"></div>
+        </div>
+    </div>
+
+    <script src="scroller.js"></script>
+</body>
+
+</html>
