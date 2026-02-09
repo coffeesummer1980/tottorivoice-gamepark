@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="1日1分、脳トレ習慣。BrainCheck">
+  <title>BrainCheck - 今日の頭のキレをチェック</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com/css2">
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap"
+    rel="stylesheet">
+</head>
+
+<body>
+
+  <div id="app">
+    <!-- START SCREEN -->
+    <div id="start-screen" class="screen active">
+      <!-- Character Image -->
+      <img src="キャラ/simple.png" alt="Character" class="char-img-start">
+
+      <h1>BrainCheck</h1>
+      <p class="producer-text">produced by とっとりVOICE</p>
+
+      <div id="theme-display" class="theme-display"></div>
+
+      <!-- Tutorial / Help Card -->
+      <div id="help-card" class="help-card" style="display:none;">
+        <div class="help-header">
+          <span>🔰 はじめての方へ</span>
+          <button id="help-close" class="help-close">×</button>
+        </div>
+        <div class="help-content">
+          <p class="help-summary">10問・100点満点。直感でサクサク答えよう！</p>
+          <ul class="help-list">
+            <li><span class="tag color">色</span> 文字の"意味"ではなく"色"を選ぶ</li>
+            <li><span class="tag math">数</span> 四則演算の答えを選ぶ</li>
+            <li><span class="tag memory">記</span> 一瞬表示される数字を覚える</li>
+            <li><span class="tag seq">列</span> 法則に合う次の数字を選ぶ</li>
+          </ul>
+          <div class="help-footer">
+            <label><input type="checkbox" id="help-toggle-check"> 次回から表示しない</label>
+          </div>
+        </div>
+      </div>
+      <!-- Help Trigger Button (Hidden by default, shown via JS logic) -->
+      <button id="help-btn" class="help-open-btn" style="display:none; margin-bottom: 8px;">？</button>
+
+      <p>1日1分、脳の若返り習慣。<br>文字の「色」を素早くタップしてください。</p>
+      <button id="start-btn" class="btn">スタート</button>
+      <p style="font-size: 12px; margin-top: 16px;">※音は出ません</p>
+      <a href="../index.html" class="home-link"
+        style="display:block; margin-top:15px; text-decoration:underline; color:#666;">ゲームパークへ戻る</a>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="game-screen" class="screen">
+      <div class="status-bar">
+        <span id="question-count">1 / 8</span>
+      </div>
+
+      <div class="timer-bar-container">
+        <div id="timer-bar" class="timer-bar"></div>
+      </div>
+
+      <!-- Question Guide Text -->
+      <div id="question-guide" class="question-guide"></div>
+
+      <div class="problem-container">
+        <div id="problem-text">準備...</div>
+      </div>
+
+      <div class="choices-grid">
+        <button class="choice-btn bg-red" data-color="red">赤</button>
+        <button class="choice-btn bg-blue" data-color="blue">青</button>
+        <button class="choice-btn bg-yellow" data-color="yellow">黄</button>
+        <button class="choice-btn bg-green" data-color="green">緑</button>
+      </div>
+    </div>
+
+    <!-- RESULT SCREEN -->
+    <div id="result-screen" class="screen">
+      <div id="result-card">
+        <div class="result-date" id="result-date">2023/10/01</div>
+        <h2 class="result-title">今日の脳スコア</h2>
+        <div class="result-score" id="result-score">--<span>点</span></div>
+        <!-- Score Difference -->
+        <div id="result-diff" class="result-diff"></div>
+
+        <div class="result-detail">
+          <div class="detail-item">
+            <span class="detail-label">TIME</span>
+            <span class="detail-value" id="result-time">--s</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">JUDGE</span>
+            <span class="detail-value" id="result-rank">--</span>
+          </div>
+        </div>
+
+        <img src="キャラ/yatta.jpeg" alt="Character" class="char-img-result">
+        <div class="result-comment" id="result-comment">
+          コメント読み込み中...
+        </div>
+        <div class="result-producer">produced by とっとりVOICE</div>
+      </div>
+
+      <button id="retry-btn" class="btn">もう一回</button>
+      <button id="history-btn" class="btn btn-secondary">履歴を見る</button>
+      <a href="../index.html" class="home-link"
+        style="display:block; margin-top:15px; text-decoration:underline; color:#666;">ゲームパークへ戻る</a>
+    </div>
+
+    <!-- HISTORY SCREEN -->
+    <div id="history-screen" class="screen">
+      <h2>過去7日間の記録</h2>
+      <ul id="history-list">
+        <!-- JSで生成 -->
+      </ul>
+      <button id="back-btn" class="btn btn-secondary" style="margin-top: auto;">戻る</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
