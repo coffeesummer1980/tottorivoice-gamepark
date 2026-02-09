@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>ゆいくんゲーム - とっとりVOICE</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Matter.js 物理エンジン -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap"
+    rel="stylesheet">
+</head>
+
+<body>
+
+  <div class="app-wrapper">
+    <!-- ゲームコンテナ -->
+    <div id="game-container">
+      <!-- ヘッダーエリア -->
+      <header class="game-header">
+        <div class="score-board">
+          <span class="label">SCORE</span>
+          <span id="score">0</span>
+        </div>
+        <div class="next-display">
+          <span class="label">NEXT</span>
+          <div id="next-ball-preview">
+            <!-- ここに次の画像を表示 -->
+          </div>
+        </div>
+      </header>
+
+      <!-- ゲーム描画エリア -->
+      <div id="canvas-container"></div>
+
+      <!-- 通知トースト -->
+      <div id="toast-container"></div>
+
+      <!-- タイトル画面 -->
+      <div id="title-screen">
+        <div class="title-content">
+          <!-- インラインスタイルで画像サイズを強制調整 -->
+          <img src="./画像/top.jpg" alt="とっとりVOICE" class="title-img"
+            style="width: 100%; max-width: 260px; height: auto; display: block; margin: 0 auto 10px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+          <h1 class="main-title">ゆいくんゲーム</h1>
+          <div class="mission-box">
+            <p class="mission-label">🎯 ミッション</p>
+            <ul id="mission-list">
+              <!-- JSで生成 -->
+            </ul>
+          </div>
+          <button id="start-btn" class="pulse-btn">ゲームスタート</button>
+          <a href="./index.html" class="secondary-btn"
+            style="margin-top: 15px; display: inline-block; text-decoration: none;">ゲームパークへ戻る</a>
+          <!-- スピンオフやクレジットを入れるならここ -->
+        </div>
+      </div>
+
+      <!-- ゲームオーバー画面 -->
+      <div id="game-over-screen" class="hidden">
+        <div class="overlay-content">
+          <h2>GAME OVER</h2>
+          <p>Score: <span id="final-score">0</span></p>
+          <div class="btn-group">
+            <button id="retry-btn">もう一度遊ぶ</button>
+            <button id="title-btn" class="secondary-btn">タイトルへ戻る</button>
+            <a href="./index.html" class="secondary-btn" style="text-decoration: none;">ゲームパークへ戻る</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 進化リスト（常時表示エリア） -->
+    <div id="evolution-container">
+      <h3>進化の輪</h3>
+      <div class="evo-list" id="evo-list-content">
+        <!-- JSで動的生成 -->
+      </div>
+    </div>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+
+</html>

@@ -5,80 +5,358 @@
   <meta charset="UTF-8">
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>ゆいくんゲーム - とっとりVOICE</title>
-  <link rel="stylesheet" href="style.css">
-  <!-- Matter.js 物理エンジン -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+  <title>とっとりVOICE ゲームパーク</title>
   <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap"
     rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <style>
+    /* Modern Reset */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --primary-color: #FF8C00;
+      /* Vibrant Orange */
+      --secondary-color: #4CAF50;
+      /* Fresh Green */
+      --accent-color: #FFEB3B;
+      /* Bright Yellow */
+      --bg-color: #FFF8E1;
+      /* Soft Cream */
+      --text-color: #333333;
+      --card-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      --font-main: 'M PLUS Rounded 1c', sans-serif;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.6;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    header {
+      background-color: #fff;
+      padding: 1rem;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-weight: 900;
+      font-size: 1.2rem;
+      color: var(--primary-color);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 2rem 1rem;
+      text-align: center;
+      background: linear-gradient(180deg, var(--bg-color) 0%, #FFFDE7 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .hero-img-container {
+      width: 100%;
+      max-width: 320px;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
+      transform: rotate(-2deg);
+      transition: transform 0.3s ease;
+      background: #fff;
+      padding: 5px;
+    }
+
+    .hero-img-container:hover {
+      transform: rotate(0deg) scale(1.02);
+    }
+
+    .hero-img {
+      width: 100%;
+      display: block;
+      border-radius: 15px;
+    }
+
+    .welcome-msg {
+      font-size: 1.5rem;
+      color: var(--primary-color);
+      font-weight: 900;
+      margin-bottom: 0.5rem;
+      text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.8);
+    }
+
+    .sub-msg {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #555;
+    }
+
+    /* Game List Section */
+    .game-list {
+      padding: 2rem 1rem;
+      max-width: 800px;
+      margin: 0 auto;
+      flex-grow: 1;
+      width: 100%;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 1.6rem;
+      color: var(--text-color);
+      position: relative;
+      display: inline-block;
+      left: 50%;
+      transform: translateX(-50%);
+      font-weight: 900;
+    }
+
+    .section-title::after {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 6px;
+      background: var(--secondary-color);
+      margin: 0.5rem auto 0;
+      border-radius: 3px;
+      opacity: 0.6;
+    }
+
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+
+    /* Game Card */
+    .game-card {
+      background: #fff;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      border: 4px solid transparent;
+    }
+
+    .game-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      z-index: 10;
+    }
+
+    .card-img-wrapper {
+      background-color: #FFF3E0;
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .card-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: transform 0.5s ease;
+      mix-blend-mode: multiply;
+    }
+
+    .game-card:hover .card-img {
+      transform: scale(1.1);
+    }
+
+    .card-content {
+      padding: 1.5rem;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      text-align: center;
+    }
+
+    .card-title {
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: var(--primary-color);
+      line-height: 1.3;
+    }
+
+    .card-desc {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .play-btn {
+      margin-top: auto;
+      background: var(--primary-color);
+      color: #fff;
+      padding: 0.9rem;
+      border-radius: 50px;
+      text-align: center;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(255, 140, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .game-card:hover .play-btn {
+      transform: scale(1.05);
+    }
+
+    /* Individual Card Accents */
+    .card-suika {
+      border-color: #FFF3E0;
+    }
+
+    .card-suika .play-btn {
+      background: linear-gradient(135deg, #FF8C00 0%, #FFB74D 100%);
+    }
+
+    .card-brain {
+      border-color: #E1F5FE;
+    }
+
+    .card-brain .card-img-wrapper {
+      background-color: #E1F5FE;
+    }
+
+    .card-brain .card-title {
+      color: #0288D1;
+    }
+
+    .card-brain .play-btn {
+      background: linear-gradient(135deg, #0288D1 0%, #29B6F6 100%);
+      box-shadow: 0 4px 15px rgba(2, 136, 209, 0.4);
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      margin-top: auto;
+      background: #fff;
+      color: #999;
+      font-size: 0.75rem;
+      border-top: 1px solid #eee;
+    }
+
+    @media (min-width: 600px) {
+      .logo {
+        font-size: 1.5rem;
+      }
+
+      .hero {
+        padding: 4rem 1rem;
+      }
+
+      .welcome-msg {
+        font-size: 2rem;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-  <div class="app-wrapper">
-    <!-- ゲームコンテナ -->
-    <div id="game-container">
-      <!-- ヘッダーエリア -->
-      <header class="game-header">
-        <div class="score-board">
-          <span class="label">SCORE</span>
-          <span id="score">0</span>
-        </div>
-        <div class="next-display">
-          <span class="label">NEXT</span>
-          <div id="next-ball-preview">
-            <!-- ここに次の画像を表示 -->
-          </div>
-        </div>
-      </header>
+  <header>
+    <a href="#" class="logo">
+      <span class="material-icons-round" style="color: var(--secondary-color);">park</span>
+      とっとりVOICE ゲームパーク
+    </a>
+  </header>
 
-      <!-- ゲーム描画エリア -->
-      <div id="canvas-container"></div>
-
-      <!-- 通知トースト -->
-      <div id="toast-container"></div>
-
-      <!-- タイトル画面 -->
-      <div id="title-screen">
-        <div class="title-content">
-          <!-- インラインスタイルで画像サイズを強制調整 -->
-          <img src="./画像/top.jpg" alt="とっとりVOICE" class="title-img"
-            style="width: 100%; max-width: 260px; height: auto; display: block; margin: 0 auto 10px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-          <h1 class="main-title">ゆいくんゲーム</h1>
-          <div class="mission-box">
-            <p class="mission-label">🎯 ミッション</p>
-            <ul id="mission-list">
-              <!-- JSで生成 -->
-            </ul>
-          </div>
-          <button id="start-btn" class="pulse-btn">ゲームスタート</button>
-          <!-- スピンオフやクレジットを入れるならここ -->
-        </div>
+  <main>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-img-container">
+        <img src="./画像/top.jpg" alt="Yukarin & Yui-kun" class="hero-img">
       </div>
+      <div>
+        <h1 class="welcome-msg">ようこそ！ゲームパークへ</h1>
+        <p class="sub-msg">ゆかりん＆ゆいくんと一緒に遊ぼう！</p>
+      </div>
+    </section>
 
-      <!-- ゲームオーバー画面 -->
-      <div id="game-over-screen" class="hidden">
-        <div class="overlay-content">
-          <h2>GAME OVER</h2>
-          <p>Score: <span id="final-score">0</span></p>
-          <div class="btn-group">
-            <button id="retry-btn">もう一度遊ぶ</button>
-            <button id="title-btn" class="secondary-btn">タイトルへ戻る</button>
+    <!-- Game List Section -->
+    <section class="game-list">
+      <h2 class="section-title">あそべるゲーム</h2>
+
+      <div class="game-grid">
+        <!-- Game A: Suika Puzzle -->
+        <a href="./puzzle.html" class="game-card card-suika">
+          <div class="card-img-wrapper">
+            <!-- yatta.jpeg implies success/fun, good for game thumbnail -->
+            <img src="./画像/yatta.jpeg" alt="ゆいくんのスイカ風パズル" class="card-img">
           </div>
-        </div>
-      </div>
-    </div>
+          <div class="card-content">
+            <h3 class="card-title">ゆいくんの<br>スイカ風パズル</h3>
+            <p class="card-desc">同じキャラをくっつけて大きく育てよう！目指せハイスコア！</p>
+            <div class="play-btn">
+              <span class="material-icons-round">play_arrow</span>
+              今すぐ遊ぶ
+            </div>
+          </div>
+        </a>
 
-    <!-- 進化リスト（常時表示エリア） -->
-    <div id="evolution-container">
-      <h3>進化の輪</h3>
-      <div class="evo-list" id="evo-list-content">
-        <!-- JSで動的生成 -->
+        <!-- Game B: Brain Check -->
+        <a href="https://coffeesummer1980.github.io/tottorivoicebraincheck/" target="_blank" rel="noopener"
+          class="game-card card-brain">
+          <div class="card-img-wrapper">
+            <!-- fumufumu.jpeg implies thinking -->
+            <img src="./画像/fumufumu.jpeg" alt="脳トレ" class="card-img">
+          </div>
+          <div class="card-content">
+            <h3 class="card-title">脳トレ<br>（脳年齢チェック）</h3>
+            <p class="card-desc">毎日1分でできる！あなたの脳は何歳？</p>
+            <div class="play-btn">
+              <span class="material-icons-round">psychology</span>
+              チャレンジ
+            </div>
+          </div>
+        </a>
       </div>
-    </div>
-  </div>
+    </section>
+  </main>
 
-  <script src="main.js"></script>
+  <footer>
+    <p>&copy; 2024 tottori VOICE. All Rights Reserved.</p>
+  </footer>
+
 </body>
 
 </html>

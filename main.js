@@ -11,7 +11,7 @@ const Engine = Matter.Engine,
 // ゲーム設定
 const CONFIG = {
     wallThickness: 20,
-    deadLineY: 120, // ラインを上げて猶予を増やす (150 -> 120)
+    deadLineY: 80, // ラインを上げて猶予を増やす (120 -> 80)
 };
 
 // キャラクターデータ
