@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>ゆいくんのパタパタフライト</title>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            touch-action: manipulation;
+        }
+
+        body {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            overflow: hidden;
+            background: #81D4FA;
+            /* Sky Blue */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 480px;
+            /* Limit width on desktop */
+            background: url('bg_pattern.png') repeat-x bottom left, linear-gradient(to bottom, #4FC3F7 0%, #E1F5FE 100%);
+            background-size: auto 100px, 100% 100%;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* UI Overlay */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 10;
+            color: #fff;
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            text-shadow: 0 4px 0 #0288D1;
+            margin-bottom: 20px;
+            color: #E1F5FE;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .btn {
+            background: linear-gradient(#FFB74D, #FF9800);
+            border: none;
+            border-bottom: 4px solid #E65100;
+            color: #fff;
+            padding: 12px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            font-weight: 900;
+            transition: transform 0.1s;
+            margin: 5px;
+            font-size: 1.2rem;
+        }
+
+        .btn:active {
+            transform: translateY(4px);
+            border-bottom-width: 0;
+            box-shadow: none;
+        }
+
+        /* Difficulty specific colors */
+        .btn-easy {
+            background: linear-gradient(#81C784, #4CAF50);
+            border-bottom-color: #1B5E20;
+        }
+
+        .btn-normal {
+            background: linear-gradient(#FFB74D, #FF9800);
+            border-bottom-color: #E65100;
+        }
+
+        .btn-hard {
+            background: linear-gradient(#E57373, #F44336);
+            border-bottom-color: #B71C1C;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #0277BD;
+            padding: 8px 15px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 20;
+        }
+
+        /* HUD */
+        #score-display {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 4rem;
+            color: #fff;
+            font-weight: 900;
+            text-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+            pointer-events: none;
+            z-index: 5;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="game-container">
+        <a href="../index.html" class="back-btn">🏠 ゲームパークへ</a>
+
+        <canvas id="gameCanvas"></canvas>
+        <div id="score-display">0</div>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="overlay active">
+            <img src="yuikun.png"
+                style="width: 100px; margin-bottom: 20px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2)); animation: float 2s ease-in-out infinite;">
+            <h1>パタパタ<br>フライト！</h1>
+            <p>難易度を選んでスタート！</p>
+            <div style="display: flex; flex-direction: column; gap: 10px; width: 80%; max-width: 300px;">
+                <button class="btn btn-easy diff-btn" data-level="easy">🐣 初級</button>
+                <button class="btn btn-normal diff-btn" data-level="normal">🐥 中級</button>
+                <button class="btn btn-hard diff-btn" data-level="hard">🦅 上級</button>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="overlay">
+            <h1>GAME OVER</h1>
+            <p>Score: <span id="final-score">0</span></p>
+            <div style="display: flex; gap: 15px;">
+                <button id="retry-btn" class="btn">もう一回！</button>
+            </div>
+            <a href="../index.html" style="margin-top: 20px; color: #fff; text-decoration: underline;">ゲームパークへ戻る</a>
+        </div>
+
+        <!-- Game Clear Screen -->
+        <div id="game-clear-screen" class="overlay">
+            <h1>🎉 CLEAR! 🎉</h1>
+            <p style="font-size: 1.5rem;">おめでとう！<br>ゆいくんは無事に飛び立ちました！</p>
+            <div style="display: flex; gap: 15px;">
+                <button onclick="location.reload()" class="btn">タイトルへ戻る</button>
+            </div>
+            <a href="../index.html" style="margin-top: 20px; color: #fff; text-decoration: underline;">ゲームパークへ戻る</a>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <style>
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+    </style>
+</body>
+
+</html>

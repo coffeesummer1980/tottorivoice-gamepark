@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>ブロックくずし - Block Breaker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #00BCD4;
+            /* Cyan */
+            --accent-color: #FF9800;
+            /* Orange */
+            --text-color: #444;
+            --font-family: 'M PLUS Rounded 1c', sans-serif;
+            --bg-grad-start: #E0F7FA;
+            --bg-grad-end: #B2EBF2;
+        }
+
+        * {
+            box-sizing: border-box;
+            touch-action: none;
+            /* Prevent browser handling of touch gestures */
+            user-select: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: var(--font-family);
+            background: linear-gradient(135deg, var(--bg-grad-start), var(--bg-grad-end));
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 600px;
+            /* Mobile focused but works on desktop */
+            background-color: #ffffff;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            /* Background image will be set via JS or drawn on canvas */
+        }
+
+        /* UI Overlays */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.92);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            transition: opacity 0.3s;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            text-shadow: 2px 2px 0 #fff, 4px 4px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            text-align: center;
+            line-height: 1.6;
+            color: #666;
+        }
+
+        .btn {
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: var(--font-family);
+            box-shadow: 0 4px 0 #0097A7;
+            transition: transform 0.1s, box-shadow 0.1s;
+            margin: 10px;
+            width: 80%;
+            max-width: 300px;
+        }
+
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #0097A7;
+        }
+
+        /* Difficulty Buttons */
+        .diff-btn {
+            width: 80%;
+            max-width: 300px;
+            margin: 10px 0;
+            padding: 20px;
+            font-size: 1.3rem;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            color: white;
+            font-family: var(--font-family);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .diff-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .diff-desc {
+            font-size: 0.9rem;
+            opacity: 0.95;
+            font-weight: normal;
+        }
+
+        /* Soft pastel gradients */
+        .easy {
+            background: linear-gradient(135deg, #81C784, #4CAF50);
+            box-shadow: 0 4px 0 #388E3C;
+        }
+
+        .normal {
+            background: linear-gradient(135deg, #FFB74D, #FF9800);
+            box-shadow: 0 4px 0 #F57C00;
+        }
+
+        .hard {
+            background: linear-gradient(135deg, #E57373, #F44336);
+            box-shadow: 0 4px 0 #D32F2F;
+        }
+
+        .easy:active,
+        .normal:active,
+        .hard:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        #score-display {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-shadow: 1px 1px 0 #fff;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        /* Toast Notification */
+        @keyframes pop {
+            0% {
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: 0;
+            }
+
+            80% {
+                transform: translate(-50%, -50%) scale(1.1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="score-display">Correct: 0</div>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="overlay active">
+            <h1>ブロックくずし</h1>
+            <p>ブロックを崩して<br>鳥取の絶景を見つけよう！</p>
+            <div style="display: flex; flex-direction: column; gap: 10px; width: 100%; align-items: center;">
+                <button class="diff-btn easy" data-level="easy" data-img="sakyu.jpg">
+                    🏜️ 初級 (砂丘)
+                    <span class="diff-desc">ブロック少なめ・ゆっくり</span>
+                </button>
+                <button class="diff-btn normal" data-level="normal" data-img="shirakabe.jpg">
+                    🏘️ 中級 (白壁)
+                    <span class="diff-desc">標準的な難易度</span>
+                </button>
+                <button class="diff-btn hard" data-level="hard" data-img="daisen.jpg">
+                    🏔️ 上級 (大山)
+                    <span class="diff-desc">ブロック多め・高速！</span>
+                </button>
+            </div>
+            <a href="../index.html"
+                style="margin-top: 20px; color: #fff; text-decoration: underline; pointer-events: all; cursor: pointer;">ゲームパークへ戻る</a>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="overlay">
+            <h1>GAME OVER</h1>
+            <p>残念！もう一度挑戦しよう！</p>
+            <button id="retry-btn" class="btn">リトライ</button>
+            <a href="../index.html"
+                style="margin-top: 20px; color: #fff; text-decoration: underline; pointer-events: all; cursor: pointer;">ゲームパークへ戻る</a>
+        </div>
+
+        <!-- Game Clear Screen -->
+        <div id="game-clear-screen" class="overlay">
+            <h1>🎉 CLEAR! 🎉</h1>
+            <p>おめでとう！<br>美しい景色が現れたね！</p>
+            <div id="clear-image-preview"
+                style="width: 200px; height: 120px; background: #333; margin-bottom: 20px; border: 2px solid #fff; background-size: cover; background-position: center;">
+            </div>
+            <button onclick="location.reload()" class="btn">タイトルへ戻る</button>
+            <a href="../index.html"
+                style="margin-top: 20px; color: #fff; text-decoration: underline; pointer-events: all; cursor: pointer;">ゲームパークへ戻る</a>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
