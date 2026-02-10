@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>鳥取ワードサーチ</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="game-container">
+        <header>
+            <h1><span class="highlight">鳥取</span>ワードサーチ</h1>
+            <div class="difficulty-selector">
+                <button class="diff-btn active" data-level="easy">初級</button>
+                <button class="diff-btn" data-level="medium">中級</button>
+                <button class="diff-btn" data-level="hard">上級</button>
+            </div>
+        </header>
+
+        <div id="character-area" class="character-area">
+            <div id="bubble-container" class="bubble-container">
+                <p id="yuikun-text">いっしょに探そう！</p>
+            </div>
+            <img src="images/fumufumu.jpeg" alt="ゆいくん" id="yuikun-img" class="character-img">
+        </div>
+
+        <main>
+            <div class="game-board-wrapper">
+                <div id="game-grid" class="grid">
+                    <!-- Grid will be generated here -->
+                </div>
+                <div id="selection-line"></div>
+            </div>
+
+            <div class="word-list-container">
+                <h2>探す言葉</h2>
+                <ul id="word-list">
+                    <!-- Words will be generated here -->
+                </ul>
+            </div>
+        </main>
+    </div>
+
+    <!-- Clear Modal -->
+    <div id="clear-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="stars">✨ ✨ ✨</div>
+            <h2>クリア！</h2>
+            <p>おめでとうございます！</p>
+            <button id="restart-btn" class="primary-btn">もう一度遊ぶ</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
