@@ -177,11 +177,21 @@ function gameOver() {
     gameState = 'GAME_OVER';
     gameOverScreen.classList.add('active');
     finalScore.innerText = score;
+
+    // SDK Record
+    if (typeof GameParkSDK !== 'undefined') {
+        GameParkSDK.recordGameResult(score * 20, 2.0); // Hard game, high reward
+    }
 }
 
 function gameClear() {
     gameState = 'GAME_CLEAR';
     document.getElementById('game-clear-screen').classList.add('active');
+
+    // SDK Record
+    if (typeof GameParkSDK !== 'undefined') {
+        GameParkSDK.recordGameResult((score * 10) + 500, 5.0); // Huge bonus
+    }
 }
 
 let lastPipeSpawn = 0;

@@ -371,6 +371,12 @@ function showClearModal() {
     modal.classList.remove('hidden');
     modal.style.opacity = '1';
     modal.style.pointerEvents = 'auto'; // Re-enable clicks
+
+    // SDK Record
+    if (typeof GameParkSDK !== 'undefined') {
+        const bonus = (currentLevel === 'hard' ? 500 : (currentLevel === 'medium' ? 300 : 100));
+        GameParkSDK.recordGameResult(bonus, 0.5);
+    }
 }
 
 // Button Listeners

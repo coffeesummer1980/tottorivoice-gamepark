@@ -364,6 +364,14 @@ function gameClear() {
         const rank = calculateRank();
         rankBadge.textContent = rank;
 
+        // SDK Record
+        if (typeof GameParkSDK !== 'undefined') {
+            const baseScore = currentPairs * 50;
+            const penalty = missCount * 10;
+            const finalScore = Math.max(10, baseScore - penalty);
+            GameParkSDK.recordGameResult(finalScore, 0.5);
+        }
+
         // Simple confetti or effect could go here
     }, 800);
 }

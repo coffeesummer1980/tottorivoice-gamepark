@@ -679,6 +679,13 @@ function endGame() {
     showScoreDiff(state.score);
 
     saveHistory(state.score, totalTime, now.toISOString(), state.theme.label);
+
+    // SDK Record
+    if (typeof GameParkSDK !== 'undefined') {
+        // Brain check score is vital, high reward
+        GameParkSDK.recordGameResult(state.score * 5, 2.0);
+    }
+
     switchScreen('result');
 }
 

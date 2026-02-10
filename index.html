@@ -334,6 +334,24 @@
       box-shadow: 0 4px 15px rgba(142, 36, 170, 0.4);
     }
 
+    /* 6. Word Search: Cyan/Blue */
+    .card-wordsearch {
+      border-color: #E0F7FA;
+    }
+
+    .card-wordsearch .card-img-wrapper {
+      background-color: #E0F7FA;
+    }
+
+    .card-wordsearch .card-title {
+      color: #00BCD4;
+    }
+
+    .card-wordsearch .play-btn {
+      background: linear-gradient(135deg, #00BCD4 0%, #26C6DA 100%);
+      box-shadow: 0 4px 15px rgba(0, 188, 212, 0.4);
+    }
+
     /* Footer */
     footer {
       text-align: center;
@@ -370,101 +388,126 @@
     </a>
   </header>
 
-  <main>
-    <!-- Hero Section -->
-    <section class="hero">
-      <div class="hero-img-container">
-        <img src="./画像/top.jpg" alt="Yukarin & Yui-kun" class="hero-img">
-      </div>
-      <div>
-        <h1 class="welcome-msg">ようこそ！ゲームパークへ</h1>
-        <p class="sub-msg">ゆかりん＆ゆいくんと一緒に遊ぼう！</p>
-      </div>
-    </section>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-img-container">
+      <img src="./画像/top.jpg" alt="Yukarin & Yui-kun" class="hero-img">
+    </div>
+    <div>
+      <h1 class="welcome-msg">ようこそ！ゲームパークへ</h1>
+      <p class="sub-msg">ゆかりん＆ゆいくんと一緒に遊ぼう！</p>
+    </div>
 
-    <!-- Game List Section -->
-    <section class="game-list">
-      <h2 class="section-title">あそべるゲーム</h2>
+    <!-- User Status Bar -->
+    <div id="game-status-bar" style="width: 100%; max-width: 500px; margin-top: 1rem;"></div>
+  </section>
 
-      <div class="game-grid">
-        <!-- Game A: Suika Puzzle -->
-        <a href="./puzzle.html" class="game-card card-suika">
-          <div class="card-img-wrapper">
-            <!-- yatta.jpeg implies success/fun, good for game thumbnail -->
-            <img src="./画像/yatta.jpeg" alt="ゆいくん合体ゲーム" class="card-img">
-          </div>
-          <div class="card-content">
-            <h3 class="card-title">ゆいくん<br>合体ゲーム</h3>
-            <p class="card-desc">同じキャラをくっつけて大きく育てよう！目指せハイスコア！</p>
-            <div class="play-btn">
-              <span class="material-icons-round">play_arrow</span>
-              今すぐ遊ぶ
-            </div>
-          </div>
-        </a>
+  <script src="game-park-sdk.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize the status bar
+      GameParkSDK.renderStatusBar('#game-status-bar');
+    });
+  </script>
 
-        <!-- Game C: Memory Game (New) -->
-        <a href="./memory_game/index.html" class="game-card card-memory">
-          <div class="card-img-wrapper">
-            <img src="./画像/love.jpeg" alt="ゆいくんの神経衰弱" class="card-img">
-          </div>
-          <div class="card-content">
-            <h3 class="card-title">ゆいくんの<br>神経衰弱</h3>
-            <p class="card-desc">初級から上級まで！<br>カードをめくって同じ絵柄を探そう！</p>
-            <div class="play-btn">
-              <span class="material-icons-round">flip</span>
-              今すぐ遊ぶ
-            </div>
-          </div>
-        </a>
+  <!-- Game List Section -->
+  <section class="game-list">
+    <h2 class="section-title">あそべるゲーム</h2>
 
-        <!-- Patapata Flight -->
-        <a href="./flappy_bird/index.html" class="game-card card-patapata">
-          <div class="card-img-wrapper">
-            <img src="./flappy_bird/yuikun.png" alt="Patapata Flight" class="card-img">
+    <div class="game-grid">
+      <!-- Game A: Suika Puzzle -->
+      <a href="./puzzle.html" class="game-card card-suika">
+        <div class="card-img-wrapper">
+          <!-- yatta.jpeg implies success/fun, good for game thumbnail -->
+          <img src="./画像/yatta.jpeg" alt="ゆいくん合体ゲーム" class="card-img">
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">ゆいくん<br>合体ゲーム</h3>
+          <p class="card-desc">同じキャラをくっつけて大きく育てよう！目指せハイスコア！</p>
+          <div class="play-btn">
+            <span class="material-icons-round">play_arrow</span>
+            今すぐ遊ぶ
           </div>
-          <div class="card-content">
-            <h3 class="card-title">ゆいくんの<br>パタパタフライト</h3>
-            <p class="card-desc">ゆいくんの冒険！障害物を避けてボスを倒そう！</p>
-            <div class="play-btn">
-              <span class="material-icons-round">flight_takeoff</span>
-              今すぐ遊ぶ
-            </div>
-          </div>
-        </a>
+        </div>
+      </a>
 
-        <!-- Tottori Block Breaker -->
-        <a href="./block/index.html" class="game-card card-block">
-          <div class="card-img-wrapper">
-            <img src="./画像/ureshi.jpeg" alt="Block Breaker" class="card-img">
+      <!-- Game C: Memory Game (New) -->
+      <a href="./memory_game/index.html" class="game-card card-memory">
+        <div class="card-img-wrapper">
+          <img src="./画像/love.jpeg" alt="ゆいくんの神経衰弱" class="card-img">
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">ゆいくんの<br>神経衰弱</h3>
+          <p class="card-desc">初級から上級まで！<br>カードをめくって同じ絵柄を探そう！</p>
+          <div class="play-btn">
+            <span class="material-icons-round">flip</span>
+            今すぐ遊ぶ
           </div>
-          <div class="card-content">
-            <h3 class="card-title">ゆいくんの<br>ブロック崩し</h3>
-            <p class="card-desc">ブロックを崩してゆいくんを見つけよう！クリアできるかな？</p>
-            <div class="play-btn">
-              <span class="material-icons-round">grid_view</span>
-              今すぐ遊ぶ
-            </div>
-          </div>
-        </a>
+        </div>
+      </a>
 
-        <!-- Game B: Brain Check -->
-        <a href="./brain_check/index.html" class="game-card card-brain">
-          <div class="card-img-wrapper">
-            <!-- fumufumu.jpeg implies thinking -->
-            <img src="./画像/fumufumu.jpeg" alt="脳トレ" class="card-img">
+      <!-- Patapata Flight -->
+      <a href="./flappy_bird/index.html" class="game-card card-patapata">
+        <div class="card-img-wrapper">
+          <img src="./flappy_bird/yuikun.png" alt="Patapata Flight" class="card-img">
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">ゆいくんの<br>パタパタフライト</h3>
+          <p class="card-desc">ゆいくんの冒険！障害物を避けてボスを倒そう！</p>
+          <div class="play-btn">
+            <span class="material-icons-round">flight_takeoff</span>
+            今すぐ遊ぶ
           </div>
-          <div class="card-content">
-            <h3 class="card-title">ゆいくんと脳トレ<br>（脳年齢チェック）</h3>
-            <p class="card-desc">毎日1分でできる！あなたの脳は何歳？</p>
-            <div class="play-btn">
-              <span class="material-icons-round">psychology</span>
-              チャレンジ
-            </div>
+        </div>
+      </a>
+
+      <!-- Tottori Block Breaker -->
+      <a href="./block/index.html" class="game-card card-block">
+        <div class="card-img-wrapper">
+          <img src="./画像/ureshi.jpeg" alt="Block Breaker" class="card-img">
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">ゆいくんの<br>ブロック崩し</h3>
+          <p class="card-desc">ブロックを崩してゆいくんを見つけよう！クリアできるかな？</p>
+          <div class="play-btn">
+            <span class="material-icons-round">grid_view</span>
+            今すぐ遊ぶ
           </div>
-        </a>
-      </div>
-    </section>
+        </div>
+      </a>
+
+      <!-- Game B: Brain Check -->
+      <a href="./brain_check/index.html" class="game-card card-brain">
+        <div class="card-img-wrapper">
+          <!-- fumufumu.jpeg implies thinking -->
+          <img src="./画像/fumufumu.jpeg" alt="脳トレ" class="card-img">
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">ゆいくんと脳トレ<br>（脳年齢チェック）</h3>
+          <p class="card-desc">毎日1分でできる！あなたの脳は何歳？</p>
+          <div class="play-btn">
+            <span class="material-icons-round">psychology</span>
+            チャレンジ
+          </div>
+        </div>
+      </a>
+
+      <!-- Game D: Word Search (New) -->
+      <a href="./wordsearch/index.html" class="game-card card-wordsearch">
+        <div class="card-img-wrapper">
+          <img src="./画像/ageru.jpeg" alt="ゆいくんのワードサーチ" class="card-img">
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">ゆいくんの<br>鳥取ワードサーチ</h3>
+          <p class="card-desc">鳥取県のご当地言葉を探そう！見つけたらゆいくんが褒めてくれるよ！</p>
+          <div class="play-btn">
+            <span class="material-icons-round">search</span>
+            今すぐ遊ぶ
+          </div>
+        </div>
+      </a>
+    </div>
+  </section>
   </main>
 
   <footer>

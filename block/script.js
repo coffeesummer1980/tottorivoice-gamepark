@@ -486,6 +486,11 @@ function getBlockColor(y) {
 function gameOver() {
     gameState = 'GAME_OVER';
     gameOverScreen.classList.add('active');
+
+    // SDK Record
+    if (typeof GameParkSDK !== 'undefined') {
+        GameParkSDK.recordGameResult(state.score * 10, 0.5); // 1 block = 10 pts
+    }
 }
 
 function gameClear() {
@@ -493,4 +498,10 @@ function gameClear() {
     gameClearScreen.classList.add('active');
     // Set preview image
     clearImagePreview.style.backgroundImage = `url(${currentImage})`;
+
+    // SDK Record
+    if (typeof GameParkSDK !== 'undefined') {
+        const bonus = (currentLevel === 'hard' ? 1000 : (currentLevel === 'normal' ? 500 : 300));
+        GameParkSDK.recordGameResult((state.score * 10) + bonus, 1.0);
+    }
 }
