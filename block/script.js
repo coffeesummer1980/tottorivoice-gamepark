@@ -5,6 +5,31 @@ const PADDLE_WIDTH = 100;
 const PADDLE_HEIGHT = 15;
 const BALL_Radius = 8;
 
+// Polyfill for roundRect (not supported on older mobile browsers)
+if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D.prototype.roundRect) {
+    CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, radii) {
+        let r = 0;
+        if (typeof radii === 'number') {
+            r = radii;
+        } else if (Array.isArray(radii) && radii.length > 0) {
+            r = radii[0];
+        }
+        if (r > w / 2) r = w / 2;
+        if (r > h / 2) r = h / 2;
+        this.moveTo(x + r, y);
+        this.lineTo(x + w - r, y);
+        this.arcTo(x + w, y, x + w, y + r, r);
+        this.lineTo(x + w, y + h - r);
+        this.arcTo(x + w, y + h, x + w - r, y + h, r);
+        this.lineTo(x + r, y + h);
+        this.arcTo(x, y + h, x, y + h - r, r);
+        this.lineTo(x, y + r);
+        this.arcTo(x, y, x + r, y, r);
+        this.closePath();
+        return this;
+    };
+}
+
 // Images
 const miyacchiImg = new Image();
 miyacchiImg.src = 'miyattsi.png';
@@ -105,13 +130,18 @@ function resizeCanvas() {
     const container = document.getElementById('game-container');
     const dpr = window.devicePixelRatio || 1;
 
+    // Use window.innerHeight for mobile compatibility (avoids 100vh address bar issue)
+    const availableHeight = window.innerHeight;
+    container.style.height = availableHeight + 'px';
+
     logicalWidth = container.offsetWidth;
     logicalHeight = container.offsetHeight;
 
     canvas.width = logicalWidth * dpr;
     canvas.height = logicalHeight * dpr;
 
-    ctx.scale(dpr, dpr);
+    // Reset transform before scaling to prevent accumulation
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     canvas.style.width = `${logicalWidth}px`;
     canvas.style.height = `${logicalHeight}px`;
