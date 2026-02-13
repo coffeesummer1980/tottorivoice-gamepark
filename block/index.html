@@ -80,16 +80,19 @@
             transition: opacity 0.3s;
             opacity: 0;
             pointer-events: none;
+            display: none;
+            /* 完全に消す */
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             padding: 20px 0;
             touch-action: auto;
-            /* Allow touch interactions (tap, scroll) on UI overlays */
         }
 
         .overlay.active {
             opacity: 1;
             pointer-events: all;
+            display: flex;
+            /* 表示する */
         }
 
         h1 {
@@ -241,7 +244,7 @@
                 </button>
             </div>
             <a href="../index.html"
-                style="display: inline-block; margin-top: 20px; color: #0097A7; text-decoration: none; font-weight: 700; padding: 8px 24px; border: 2px solid #0097A7; border-radius: 50px; pointer-events: all; cursor: pointer; transition: all 0.2s;">🏠
+                style="display: inline-block; margin-top: 20px; color: #0097A7; text-decoration: none; font-weight: 700; padding: 8px 24px; border: 2px solid #0097A7; border-radius: 50px; cursor: pointer; transition: all 0.2s;">🏠
                 ゲームパークへ戻る</a>
         </div>
 
@@ -253,7 +256,7 @@
             <button onclick="location.reload()" class="btn"
                 style="background: #78909C; box-shadow: 0 4px 0 #546E7A; margin-top: 5px;">タイトルへ戻る</button>
             <a href="../index.html"
-                style="margin-top: 15px; color: #fff; text-decoration: underline; pointer-events: all; cursor: pointer;">ゲームパークへ戻る</a>
+                style="margin-top: 15px; color: #fff; text-decoration: underline; cursor: pointer;">ゲームパークへ戻る</a>
         </div>
 
         <!-- Game Clear Screen -->
@@ -265,7 +268,7 @@
             </div>
             <button onclick="location.reload()" class="btn">タイトルへ戻る</button>
             <a href="../index.html"
-                style="margin-top: 20px; color: #fff; text-decoration: underline; pointer-events: all; cursor: pointer;">ゲームパークへ戻る</a>
+                style="margin-top: 20px; color: #fff; text-decoration: underline; cursor: pointer;">ゲームパークへ戻る</a>
         </div>
     </div>
 
