@@ -18,7 +18,8 @@ body {
     font-family: var(--font);
     background: #f0f4f8;
     overflow: hidden;
-    touch-action: none;
+    /* touch-action: none; */
+    /* これを削除してスクロールを許可 */
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
@@ -72,26 +73,27 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.98);
+    /* より不透明にして干渉を防ぐ */
     backdrop-filter: blur(8px);
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    /* 上から配置 */
+    /* 上から順に配置 */
     align-items: center;
     pointer-events: auto;
     z-index: 100;
     padding: 20px;
-    padding-top: 100px;
-    /* ステータスバーとの重なりを防ぐ */
-    padding-bottom: 50px;
-    /* 下部に余白を追加 */
+    padding-top: 160px;
+    /* 100pxから160pxに増やして重なりを確実に防ぐ */
+    padding-bottom: 80px;
+    /* 下部余白も確保 */
     overflow-y: auto;
-    /* スクロール可能にする */
+    /* 縦スクロールを許可 */
     -webkit-overflow-scrolling: touch;
-    touch-action: auto;
-    /* タッチ操作（スクロール）を許可 */
-    gap: 12px;
+    touch-action: pan-y;
+    /* 縦方向のスクロール操作を明示的に許可 */
+    gap: 16px;
     transition: opacity 0.3s ease;
 }
 
