@@ -45,13 +45,13 @@ const DIFFICULTIES = {
     normal: {
         rows: 8,
         cols: 8,
-        ballSpeed: 6,
+        ballSpeed: 4,
         img: 'shirakabe.jpg'
     },
     hard: {
         rows: 12,
         cols: 10,
-        ballSpeed: 8,
+        ballSpeed: 6,
         img: 'daisen.jpg'
     }
 };
