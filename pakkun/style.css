@@ -76,13 +76,21 @@ body {
     backdrop-filter: blur(8px);
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
+    /* 上から配置 */
     align-items: center;
     pointer-events: auto;
     z-index: 100;
     padding: 20px;
     padding-top: 100px;
     /* ステータスバーとの重なりを防ぐ */
+    padding-bottom: 50px;
+    /* 下部に余白を追加 */
+    overflow-y: auto;
+    /* スクロール可能にする */
+    -webkit-overflow-scrolling: touch;
+    touch-action: auto;
+    /* タッチ操作（スクロール）を許可 */
     gap: 12px;
     transition: opacity 0.3s ease;
 }
