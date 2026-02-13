@@ -84,8 +84,8 @@ body {
     pointer-events: auto;
     z-index: 100;
     padding: 20px;
-    padding-top: 200px;
-    /* 160pxから200pxに増やしてPCでも確実に重なりを回避 */
+    padding-top: 260px;
+    /* 260pxまで増やしてPCでも確実に重なりを回避 */
     padding-bottom: 80px;
     /* 下部余白も確保 */
     overflow-y: auto;
