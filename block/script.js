@@ -8,6 +8,8 @@ const BALL_Radius = 8;
 // Images
 const miyacchiImg = new Image();
 miyacchiImg.src = 'miyattsi.png';
+const yuikunImg = new Image();
+yuikunImg.src = 'yuikun.png';
 const yukarinImg = new Image();
 yukarinImg.src = 'yukarin.png';
 
@@ -201,7 +203,7 @@ function createBlocks(rows, cols) {
             let type = 'normal';
             const rand = Math.random();
             if (rand < 0.03) type = 'yukarin'; // 3% Yukarin (Super Rare)
-            else if (rand < 0.10) type = 'miyacchi'; // 10% Miyacchi (Rare)
+            else if (rand < 0.10) type = 'yuikun'; // 10% Yuikun (Rare)
 
             state.blocks.push({
                 x: c * blockWidth,
@@ -328,9 +330,9 @@ function update() {
                     state.score++;
 
                     // Item Effect
-                    if (block.type === 'miyacchi') {
+                    if (block.type === 'yuikun') {
                         ballsToAdd.push(createBall(ball.x, ball.y, ball.baseSpeed));
-                        showToast('📸 みやっち分裂！');
+                        showToast('🐣 ゆいくん分裂！');
                     } else if (block.type === 'yukarin') {
                         for (let i = 0; i < 4; i++) ballsToAdd.push(createBall(ball.x, ball.y, ball.baseSpeed));
                         showToast('🎀 ゆかりんフィーバー！');
@@ -393,7 +395,7 @@ function draw() {
     state.blocks.forEach(block => {
         if (block.status === 1) {
             ctx.fillStyle = '#87CEEB';
-            if (block.type === 'miyacchi') ctx.fillStyle = '#90CAF9'; // Light Blue
+            if (block.type === 'yuikun') ctx.fillStyle = '#C5E1A5'; // Light Green
             if (block.type === 'yukarin') ctx.fillStyle = '#F48FB1'; // Pink
 
             ctx.fillRect(block.x, block.y, block.width, block.height);
@@ -403,7 +405,7 @@ function draw() {
 
             // Draw Item Icon (Centered & Aspect Ratio Preserved)
             let img = null;
-            if (block.type === 'miyacchi' && miyacchiImg.complete) img = miyacchiImg;
+            if (block.type === 'yuikun' && yuikunImg.complete) img = yuikunImg;
             if (block.type === 'yukarin' && yukarinImg.complete) img = yukarinImg;
 
             if (img) {
