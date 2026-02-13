@@ -22,9 +22,12 @@
 
         * {
             box-sizing: border-box;
-            touch-action: none;
-            /* Prevent browser handling of touch gestures */
             user-select: none;
+        }
+
+        canvas {
+            touch-action: none;
+            /* Prevent browser handling of touch gestures on canvas only */
         }
 
         body {
@@ -78,7 +81,10 @@
             opacity: 0;
             pointer-events: none;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
             padding: 20px 0;
+            touch-action: auto;
+            /* Allow touch interactions (tap, scroll) on UI overlays */
         }
 
         .overlay.active {
@@ -115,6 +121,7 @@
             margin: 10px;
             width: 80%;
             max-width: 300px;
+            touch-action: manipulation;
         }
 
         .btn:active {
@@ -139,6 +146,7 @@
             align-items: center;
             gap: 5px;
             transition: transform 0.2s, box-shadow 0.2s;
+            touch-action: manipulation;
         }
 
         .diff-btn:hover {
