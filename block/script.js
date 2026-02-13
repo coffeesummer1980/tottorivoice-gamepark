@@ -275,9 +275,12 @@ function setupControls() {
     };
 
     container.addEventListener('mousemove', (e) => movePaddle(e.clientX));
+
     container.addEventListener('touchmove', (e) => {
-        e.preventDefault();
-        movePaddle(e.touches[0].clientX);
+        if (gameState === 'PLAYING') {
+            e.preventDefault();
+            movePaddle(e.touches[0].clientX);
+        }
     }, { passive: false });
 
     // Click/Tap to Launch
@@ -292,11 +295,19 @@ function setupControls() {
         }
     };
 
-    container.addEventListener('mousedown', launchBall);
-    container.addEventListener('touchstart', (e) => {
-        e.preventDefault(); // Prevent double firing
-        launchBall();
+    container.addEventListener('mousedown', (e) => {
+        if (gameState === 'PLAYING') {
+            launchBall();
+        }
     });
+
+    container.addEventListener('touchstart', (e) => {
+        if (gameState === 'PLAYING') {
+            e.preventDefault(); // Prevent scrolling/zooming while playing
+            launchBall();
+            movePaddle(e.touches[0].clientX);
+        }
+    }, { passive: false });
 }
 
 // Game Loop
