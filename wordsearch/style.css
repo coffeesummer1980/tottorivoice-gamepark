@@ -392,3 +392,38 @@ h1 {
 .character-jump {
     animation: jump 0.5s ease;
 }
+
+/* ゲームパークへ戻るボタン */
+.back-to-park {
+    display: inline-block;
+    background: rgba(78, 205, 196, 0.15);
+    color: #00b894;
+    text-decoration: none;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    border: 1.5px solid rgba(78, 205, 196, 0.3);
+    transition: all 0.3s ease;
+}
+
+.back-to-park:hover {
+    background: rgba(78, 205, 196, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(78, 205, 196, 0.2);
+}
+
+.back-to-park-modal {
+    display: inline-block;
+    color: #636e72;
+    text-decoration: underline;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-top: 12px;
+    transition: color 0.3s ease;
+}
+
+.back-to-park-modal:hover {
+    color: var(--secondary-color);
+}
