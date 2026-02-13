@@ -39,7 +39,7 @@ const DIFFICULTIES = {
     easy: {
         rows: 5,
         cols: 6,
-        ballSpeed: 4,
+        ballSpeed: 2.5,
         img: 'sakyu.jpg'
     },
     normal: {
