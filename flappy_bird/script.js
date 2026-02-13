@@ -126,8 +126,8 @@ function resizeCanvas() {
     canvas.width = logicalWidth * dpr;
     canvas.height = logicalHeight * dpr;
 
-    // Scale context to match
-    ctx.scale(dpr, dpr);
+    // Reset transform before scaling to prevent accumulation on resize
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     // Style size (display size) remains the same
     canvas.style.width = `${logicalWidth}px`;

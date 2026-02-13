@@ -23,6 +23,7 @@ body {
     font-family: var(--font-main);
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
     overflow: hidden;
     background: #333;
     display: flex;
@@ -257,6 +258,7 @@ button:active {
         border: none;
         border-radius: 0;
         max-height: 100vh;
+        max-height: 100dvh;
     }
 
     :root {
