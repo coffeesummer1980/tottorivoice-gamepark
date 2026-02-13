@@ -1,11 +1,11 @@
 // --- Constants ---
 const SHUFFLE_CARD_IMG = 'shuffle_icon.png';
 const IMAGE_LIST = [
-    'fumufumu.jpeg',
-    'ageru.jpeg',
+    '../画像/fumufumu-Photoroom.png',
+    '../画像/ageru-Photoroom.png',
     'ureshi.jpeg',
-    'yatta.jpeg',
-    'love.jpeg',
+    '../画像/yatta-Photoroom.png',
+    '../画像/love-Photoroom.png',
     'IMG_0453.PNG',
     'IMG_0454.PNG',
     'IMG_0455.PNG',

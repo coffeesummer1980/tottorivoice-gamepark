@@ -17,11 +17,11 @@ const CONFIG = {
 // キャラクターデータ
 const BALL_LEVELS = [
     { level: 1, radius: 22, score: 0, img: './画像/simple.png' },
-    { level: 2, radius: 30, score: 2, img: './画像/fumufumu.jpeg' },
-    { level: 3, radius: 38, score: 4, img: './画像/ageru.jpeg' },
+    { level: 2, radius: 30, score: 2, img: './画像/fumufumu-Photoroom.png' },
+    { level: 3, radius: 38, score: 4, img: './画像/ageru-Photoroom.png' },
     { level: 4, radius: 46, score: 8, img: './画像/ureshi.jpeg' },
-    { level: 5, radius: 56, score: 16, img: './画像/yatta.jpeg' },
-    { level: 6, radius: 68, score: 32, img: './画像/love.jpeg' },
+    { level: 5, radius: 56, score: 16, img: './画像/yatta-Photoroom.png' },
+    { level: 6, radius: 68, score: 32, img: './画像/love-Photoroom.png' },
     { level: 7, radius: 81, score: 64, img: './画像/IMG_0453.PNG' },
     { level: 8, radius: 95, score: 128, img: './画像/IMG_0454.PNG' },
     { level: 9, radius: 110, score: 256, img: './画像/IMG_0455.PNG' },

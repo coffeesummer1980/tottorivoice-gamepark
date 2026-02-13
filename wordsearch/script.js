@@ -407,11 +407,11 @@ function playReaction() {
     const imgEl = document.getElementById('yuikun-img');
     if (imgEl) {
         // Random happy image
-        const happyImages = ["yatta.jpeg", "ureshi.jpeg", "love.jpeg"];
+        const happyImages = ["yatta-Photoroom.png", "love-Photoroom.png"]; // replaced ureshi since no png for it
         const randomImg = happyImages[Math.floor(Math.random() * happyImages.length)];
 
         // simple image switch
-        imgEl.src = `images/${randomImg}`;
+        imgEl.src = `../画像/${randomImg}`;
 
         // Trigger jump animation
         imgEl.classList.remove("character-jump");
@@ -425,7 +425,7 @@ function playReaction() {
         const imgEl = document.getElementById('yuikun-img');
         if (textEl) textEl.textContent = "いっしょに探そう！";
         if (imgEl) {
-            imgEl.src = "images/fumufumu.jpeg";
+            imgEl.src = "../画像/fumufumu-Photoroom.png";
             imgEl.classList.remove("character-jump");
         }
     }, 2000);
