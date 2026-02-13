@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ゆかりんぱっくん！</title>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- ステータスバー (SDKが描画) -->
+    <div id="game-status-bar"></div>
+
+    <div id="game-container">
+        <!-- ゲームキャンバス -->
+        <canvas id="game-canvas"></canvas>
+
+        <!-- UIオーバーレイ -->
+        <div id="ui-layer">
+            <!-- スコア表示 (ゲーム中のみ見える) -->
+            <div id="score-display" class="hidden">スコア: <span id="score-val">0</span></div>
+
+            <!-- スタート画面 -->
+            <div id="start-screen" class="overlay-screen">
+                <img src="characters/normal.png" alt="ゆかりん" class="title-character">
+                <h1 class="game-title">ゆかりん<br>ぱっくん！</h1>
+                <div class="how-to-play">
+                    <strong>【あそびかた】</strong><br>
+                    🍱 上から落ちてくる鳥取の美味しいものを食べよう<br>
+                    👆 画面をタッチ or マウスでゆかりんを動かそう<br>
+                    🍄 毒キノコだけは食べちゃダメ！（即ゲームオーバー）
+                </div>
+                <button id="start-btn" class="btn-start">スタート！</button>
+            </div>
+
+            <!-- ゲームオーバー画面 -->
+            <div id="gameover-screen" class="overlay-screen hidden">
+                <img src="characters/damage.png" alt="ゆかりん" class="gameover-character">
+                <h2 class="gameover-title">ゲームオーバー</h2>
+                <div class="gameover-score">スコア: <span id="final-score">0</span></div>
+                <div id="result-message" class="result-msg"></div>
+                <div class="btn-group">
+                    <button id="retry-btn" class="btn-retry">もう一度あそぶ</button>
+                    <button id="title-btn" class="btn-retry" onclick="location.reload()"
+                        style="background: linear-gradient(135deg, #78909C, #546E7A);">タイトルへ戻る</button>
+                    <button id="home-btn" class="btn-home" onclick="location.href='../index.html'">ゲームパークへ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- モーダル用コンテナ (SDK用) -->
+    <div id="modal-container"></div>
+
+    <script src="../game-park-sdk.js"></script>
+    <script src="game.js"></script>
+</body>
+
+</html>

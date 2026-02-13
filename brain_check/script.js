@@ -160,6 +160,7 @@ const ui = {
 // --- Event Listeners ---
 document.getElementById('start-btn').addEventListener('click', startGame);
 document.getElementById('retry-btn').addEventListener('click', startGame);
+document.getElementById('back-to-title-btn').addEventListener('click', () => switchScreen('start'));
 document.getElementById('history-btn').addEventListener('click', showHistory);
 document.getElementById('back-btn').addEventListener('click', () => switchScreen('result'));
 
