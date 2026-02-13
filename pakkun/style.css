@@ -84,8 +84,8 @@ body {
     pointer-events: auto;
     z-index: 100;
     padding: 20px;
-    padding-top: 160px;
-    /* 100pxから160pxに増やして重なりを確実に防ぐ */
+    padding-top: 200px;
+    /* 160pxから200pxに増やしてPCでも確実に重なりを回避 */
     padding-bottom: 80px;
     /* 下部余白も確保 */
     overflow-y: auto;
@@ -128,7 +128,8 @@ body {
 }
 
 .game-title {
-    font-size: 2.8rem;
+    font-size: 2.4rem;
+    /* 2.8remから少し小さくして確実に収める */
     color: var(--primary);
     text-align: center;
     line-height: 1.2;
@@ -224,7 +225,8 @@ button:active {
 /* === ステータスバー === */
 #game-status-bar {
     position: absolute;
-    top: 10px;
+    top: 0;
+    /* コンテナ内に入ったので 0 から開始 */
     left: 0;
     width: 100%;
     z-index: 200;
