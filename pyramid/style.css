@@ -1,0 +1,437 @@
+:root {
+    --bg-color: #2c3e50;
+    --table-color: #27ae60;
+    --card-bg: #ecf0f1;
+    --card-border: #bdc3c7;
+    --card-selected: #f1c40f;
+    /* 黄色でハイライト */
+    --card-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    --text-dark: #2c3e50;
+    --text-red: #c0392b;
+    --font-main: 'M PLUS Rounded 1c', sans-serif;
+
+    /* カードの基本サイズ比率（アスペクト比 3:4程度） */
+    --card-width: 60px;
+    --card-height: 84px;
+    /* モバイル向け調整用 */
+    --card-scale: 1;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    /* テキスト選択無効化 */
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: var(--font-main);
+    background-color: var(--bg-color);
+    color: white;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    /* スクロール防止 */
+}
+
+.game-container {
+    width: 100%;
+    max-width: 600px;
+    height: 100%;
+    background-color: var(--table-color);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    height: 60px;
+}
+
+h1 {
+    font-size: 1.2rem;
+    margin-right: 10px;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn {
+    background-color: #34495e;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: var(--font-main);
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+.btn:active {
+    transform: scale(0.95);
+}
+
+.btn.primary {
+    background-color: #e67e22;
+    font-size: 1.2rem;
+    padding: 12px 24px;
+}
+
+.score-board {
+    font-size: 0.9rem;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+/* メインエリア */
+main {
+    flex: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    /* justify-content: space-between; */
+    /* 下部に余裕を持たせる */
+}
+
+/* ピラミッドエリア */
+.pyramid-container {
+    position: relative;
+    /* カードの絶対配置の基準 */
+    width: 100%;
+    min-height: 400px;
+    /* カード配置エリア確保 */
+    /* 高さはカード配置に応じて確保したいが、とりあえずフレキシブルに */
+    flex-grow: 1;
+    margin-top: 20px;
+}
+
+/* カード共通スタイル */
+.card {
+    position: absolute;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    /* 上左と右下に数値を配置 */
+    padding: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.1s ease-out, box-shadow 0.2s, top 0.3s, left 0.3s;
+    /* サイズはJSで動的にリサイズするか、メディアクエリで調整 */
+    width: var(--card-width);
+    height: var(--card-height);
+    font-size: 1rem;
+    color: var(--text-dark);
+    z-index: 10;
+}
+
+/* カード内の画像（ゆいくんなど） */
+.suit-img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+/* スートごとの色変え（filter使用消去） */
+/* 画像そのものが違うので不要 */
+
+/* カードの内容物 */
+.card-pip {
+    pointer-events: none;
+    /* クリック透過 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card-top-left {
+    align-self: flex-start;
+    line-height: 1;
+}
+
+.card-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+}
+
+.card-bottom-right {
+    align-self: flex-end;
+    transform: rotate(180deg);
+    line-height: 1;
+}
+
+/* スートの色 (テキスト用は不要になるが残しておく) */
+.card[data-suit="♥"],
+.card[data-suit="♦"] {
+    color: var(--text-red);
+}
+
+/* 裏面 */
+.card.back {
+    background: repeating-linear-gradient(45deg,
+            #3498db,
+            #3498db 10px,
+            #2980b9 10px,
+            #2980b9 20px);
+    border: 2px solid #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: transparent;
+    /* 文字隠し */
+}
+
+.card.back::after {
+    content: '';
+    /* 何も表示しない */
+}
+
+/* 選択状態 */
+.card.selected {
+    border: 3px solid var(--card-selected);
+    transform: translateY(-5px) scale(1.05);
+    /* 少し浮き上がる */
+    box-shadow: 0 5px 15px rgba(241, 196, 15, 0.4);
+    z-index: 100;
+}
+
+/* 選択不可状態（暗くする等の演出） - 今回は特に指定なしだが、視覚的にわかりやすく */
+.card.disabled {
+    filter: brightness(0.7);
+    cursor: not-allowed;
+}
+
+/* 下部デッキエリア */
+.deck-area {
+    height: 120px;
+    /* カード高さ + マージン */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 50;
+    /* ピラミッドより手前に */
+}
+
+.stock-pile-container,
+.waste-pile-container {
+    position: relative;
+    width: var(--card-width);
+    height: var(--card-height);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.label {
+    position: absolute;
+    bottom: -25px;
+    width: 100%;
+    text-align: center;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.card-placeholder {
+    width: var(--card-width);
+    height: var(--card-height);
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+}
+
+/* 山札と捨て札のカード位置調整 */
+#stock-pile,
+#waste-pile .card {
+    position: absolute;
+    /* 親に対して絶対配置 */
+    top: 0;
+    left: 0;
+}
+
+/* オーバーレイ */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity 0.3s;
+}
+
+.overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.overlay-content {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    color: var(--text-dark);
+}
+
+.overlay-content h2 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: #27ae60;
+}
+
+/* メディアクエリ：画面幅に応じてカードサイズ調整 */
+@media (min-width: 600px) {
+    :root {
+        --card-width: 80px;
+        --card-height: 112px;
+    }
+}
+
+@media (max-width: 360px) {
+    :root {
+        --card-width: 45px;
+        --card-height: 63px;
+    }
+
+    h1 {
+        font-size: 1rem;
+    }
+
+    .btn {
+        font-size: 0.8rem;
+        padding: 6px 10px;
+    }
+}
+
+/* 応援キャラクターエリア */
+.cheer-container {
+    position: absolute;
+    bottom: 140px;
+    /* デッキの上 */
+    left: 0;
+    width: 100%;
+    height: 0;
+    /* 高さは取らない（はみ出し配置） */
+    pointer-events: none;
+    /* クリック透過 */
+    z-index: 60;
+}
+
+.character-box {
+    position: absolute;
+    bottom: 0;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+.character-box.left {
+    left: 10px;
+}
+
+.character-box.right {
+    right: 10px;
+}
+
+.character-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* 吹き出し */
+.bubble {
+    position: absolute;
+    bottom: 80%;
+    /* キャラの上に配置 */
+    background: white;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    color: #333;
+    font-weight: bold;
+    white-space: nowrap;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    /* 吹き出しのしっぽ */
+    display: block;
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    opacity: 1;
+    transition: opacity 0.5s;
+}
+
+.bubble.hidden {
+    opacity: 0;
+    transform: scale(0.8);
+    pointer-events: none;
+}
+
+.character-box.left .bubble {
+    left: 50%;
+    transform: translateX(-20%);
+}
+
+.character-box.right .bubble {
+    right: 50%;
+    transform: translateX(20%);
+}
+
+.character-box.left .bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 20px;
+    border-width: 8px 8px 0;
+    border-style: solid;
+    border-color: white transparent transparent transparent;
+}
+
+.character-box.right .bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    right: 20px;
+    border-width: 8px 8px 0;
+    border-style: solid;
+    border-color: white transparent transparent transparent;
+}
+
+@keyframes popIn {
+    0% {
+        transform: scale(0) translateY(20px);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}

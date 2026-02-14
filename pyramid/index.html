@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ゆいくんのピラミッドソリティア</title>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="game-container">
+        <header>
+            <h1>ゆいくんのピラミッドソリティア</h1>
+            <div class="controls">
+                <button id="new-game-btn" class="btn">New Game</button>
+                <div class="score-board">残り: <span id="card-count">28</span>枚</div>
+            </div>
+        </header>
+
+        <main id="game-area">
+            <!-- ピラミッドエリア -->
+            <div id="pyramid-container" class="pyramid-container">
+                <!-- カードはJSで生成 -->
+            </div>
+
+            <div class="cheer-container">
+                <div class="character-box left">
+                    <div id="yukarin-bubble" class="bubble hidden">ナイス！</div>
+                    <img src="assets/yukarin.png" alt="ゆかりん" class="character-img">
+                </div>
+                <div class="character-box right">
+                    <div id="miyacchi-bubble" class="bubble hidden">いいね！</div>
+                    <img src="assets/miyacchi.png" alt="みやっち" class="character-img">
+                </div>
+            </div>
+
+            <!-- 下部エリア：山札と捨て札 -->
+            <div class="deck-area">
+                <div class="stock-pile-container">
+                    <div id="stock-pile" class="card back"></div>
+                    <div class="label">STOCK</div>
+                </div>
+
+                <div class="waste-pile-container">
+                    <div id="waste-pile" class="card-placeholder"></div>
+                    <div class="label">WASTE</div>
+                </div>
+            </div>
+        </main>
+
+        <!-- クリア画面オーバーレイ -->
+        <div id="clear-overlay" class="overlay hidden">
+            <div class="overlay-content">
+                <h2>クリア！🎉</h2>
+                <p>やったね！全ちけしたよ！</p>
+                <button id="overlay-new-game-btn" class="btn primary">もう一度遊ぶ</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+
+</html>
