@@ -51,6 +51,29 @@
             </div>
         </main>
 
+        <!-- スタート画面オーバーレイ -->
+        <div id="start-overlay" class="overlay">
+            <div class="overlay-content">
+                <h2>ピラミッドソリティア</h2>
+                <img src="assets/yuikun_spade.png" style="width: 80px; margin: 10px auto; display: block;">
+                <p>カードを2枚選んで<br>合計「13」を作って消そう！</p>
+                <div class="rule-description">
+                    <p>K(13)は1枚で消せます。</p>
+                    <p>全てのカードを消すとクリア！</p>
+                </div>
+                <button id="start-btn" class="btn primary">ゲームスタート</button>
+            </div>
+        </div>
+
+        <!-- ゲームオーバー画面オーバーレイ -->
+        <div id="game-over-overlay" class="overlay hidden">
+            <div class="overlay-content">
+                <h2>Game Over...</h2>
+                <p>もう動かせないよ〜😭</p>
+                <button id="retry-btn" class="btn primary">リトライ</button>
+            </div>
+        </div>
+
         <!-- クリア画面オーバーレイ -->
         <div id="clear-overlay" class="overlay hidden">
             <div class="overlay-content">

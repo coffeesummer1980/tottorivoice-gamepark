@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>星座Untangleパズル | とっとりVOICE</title>
+    <meta name="description" content="星をほどいて星座を完成させよう！星取県の夜空パズル。">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <!-- Style -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Background Stars -->
+    <div class="star-bg"></div>
+
+    <!-- Header -->
+    <header>
+        <h1>星座パズル</h1>
+        <p class="subtitle">線をほどいて星座を作ろう</p>
+    </header>
+
+    <!-- Game Canvas -->
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <!-- Reset Button -->
+    <button id="reset-btn" class="reset-btn" aria-label="リセット">
+        <span class="material-icons-round">refresh</span>
+    </button>
+
+    <!-- Clear Overlay -->
+    <div id="clear-overlay">
+        <div class="clear-message">星座、完成！✨</div>
+        <p style="margin-bottom: 2rem; opacity: 0.8;">美しい星空が戻りました</p>
+        <div>
+            <button id="next-btn" class="btn">もう一度遊ぶ</button>
+            <a href="../index.html" class="btn btn-secondary">ホームへ</a>
+        </div>
+    </div>
+
+    <!-- Game Logic -->
+    <script src="main.js"></script>
+</body>
+
+</html>

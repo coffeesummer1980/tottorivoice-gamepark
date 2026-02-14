@@ -137,37 +137,59 @@ class Game {
         this.selectedCards = []; // 選択中のカード（最大2枚）
         this.score = 0; // 残り枚数として表示
 
+        this.gameState = 'START'; // START, PLAYING, CLEAR, GAMEOVER
         this.isProcessing = false; // 操作ロック用フラグ
 
         // DOM要素
         this.pyramidContainer = document.getElementById('pyramid-container');
         this.stockPile = document.getElementById('stock-pile');
-        this.wastePileContainer = document.querySelector('.waste-pile-container'); // コンテナが必要
+        this.wastePileContainer = document.querySelector('.waste-pile-container');
         this.cardCountSpan = document.getElementById('card-count');
         this.newGameBtn = document.getElementById('new-game-btn');
+
+        // Overlays
+        this.startOverlay = document.getElementById('start-overlay');
+        this.gameOverOverlay = document.getElementById('game-over-overlay');
         this.clearOverlay = document.getElementById('clear-overlay');
+
+        // Buttons
+        this.startBtn = document.getElementById('start-btn');
+        this.retryBtn = document.getElementById('retry-btn');
         this.overlayNewGameBtn = document.getElementById('overlay-new-game-btn');
 
         // wasteパイルのプレースホルダー
         this.wastePlaceholder = document.getElementById('waste-pile');
 
-        // wasteパイルのプレースホルダー
-        this.wastePlaceholder = document.getElementById('waste-pile');
-
-        // 応援用要素
+        // 応援・ヒント用要素
         this.yukarinBubble = document.getElementById('yukarin-bubble');
         this.miyacchiBubble = document.getElementById('miyacchi-bubble');
+
+        // キャラクターボックス（クリック用）
+        this.yukarinBox = document.querySelector('.character-box.left');
+        this.miyacchiBox = document.querySelector('.character-box.right');
 
         this.init();
     }
 
     init() {
         this.bindEvents();
-        this.startNewGame();
+        // 最初はスタート画面を表示
+        this.startOverlay.classList.remove('hidden');
     }
 
     bindEvents() {
-        this.newGameBtn.addEventListener('click', () => this.startNewGame());
+        this.newGameBtn.addEventListener('click', () => this.confirmNewGame());
+
+        this.startBtn.addEventListener('click', () => {
+            this.startOverlay.classList.add('hidden');
+            this.startNewGame();
+        });
+
+        this.retryBtn.addEventListener('click', () => {
+            this.gameOverOverlay.classList.add('hidden');
+            this.startNewGame();
+        });
+
         this.overlayNewGameBtn.addEventListener('click', () => {
             this.clearOverlay.classList.add('hidden');
             this.startNewGame();
@@ -176,13 +198,19 @@ class Game {
         // 山札クリック
         this.stockPile.addEventListener('click', () => this.drawCard());
 
-        // ピラミッド・コンテナへの委譲イベント（生成されたカード用）
-        // ただし、カードは絶対配置されるので、カード自体にイベントリスナーを追加する方が確実
-        // ここではグローバルなクリックハンドラとして実装
+        // キャラクタークリック（ヒント機能）
+        this.yukarinBox.addEventListener('click', () => this.showHint());
+        this.miyacchiBox.addEventListener('click', () => this.cheerMiyacchi(true));
+    }
+
+    confirmNewGame() {
+        if (confirm('新しいゲームを始めますか？')) {
+            this.startNewGame();
+        }
     }
 
     startNewGame() {
-        this.clearOverlay.classList.add('hidden');
+        this.gameState = 'PLAYING';
         this.deck = this.createDeck();
         this.shuffleDeck();
 
@@ -193,10 +221,14 @@ class Game {
         this.selectedCards = [];
         this.pyramidContainer.innerHTML = '';
 
-        // waste表示エリアのクリア（プレースホルダー以外を削除）
-        // 現在表示されているカードを取り除く
+        // waste表示エリアのクリア
         const currentWasteCard = this.wastePileContainer.querySelector('.card');
         if (currentWasteCard) currentWasteCard.remove();
+
+        // オーバーレイ隠し（念の為）
+        this.startOverlay.classList.add('hidden');
+        this.gameOverOverlay.classList.add('hidden');
+        this.clearOverlay.classList.add('hidden');
 
         // カードを配る
         this.dealCards();
@@ -205,7 +237,7 @@ class Game {
         this.stock = [...this.deck];
 
         this.updateView();
-        this.updateCardCount(); // 初回表示更新
+        this.updateCardCount();
     }
 
     createDeck() {
@@ -227,13 +259,6 @@ class Game {
     }
 
     dealCards() {
-        // ピラミッドは7段
-        // 1段目: 1枚
-        // ...
-        // 7段目: 7枚
-        // 合計28枚
-
-        let cardIndex = 0;
         for (let row = 0; row < 7; row++) {
             this.pyramid[row] = [];
             for (let col = 0; col <= row; col++) {
@@ -251,82 +276,39 @@ class Game {
                 this.positionCard(card, row, col);
             }
         }
-
     }
 
-    /**
-     * カードの配置計算 (レスポンシブ対応のため % や calc を使用)
-     */
     positionCard(card, row, col) {
-        // カードの幅・高さ
-        // CSS変数から取得するのが理想だが、ここでは相対位置で計算する
-        // ピラミッドの中央揃えにする
-
-        // 下にいくほど行の幅が広がる。
-        // 行の中心 = コンテナの中心
-
-        const cardWidth = 60; // 仮想的な基準幅
-        const cardHeight = 84;
-        const gapX = 10;
-        const gapY = -40; // 重ねる量
-
-        // row行のカード全体の幅
-        const rowWidth = (row + 1) * cardWidth + row * gapX;
-
-        // コンテナの中心からのオフセット
-        // 50% を中心として、そこから rowWidth / 2 を引いた位置が左端
-        // そこに col * (cardWidth + gapX) を足す
-
-        // CSS変数を使うスタイルに変更
-        // left: calc(50% - (row_width / 2) + col_offset)
-
-        // 簡易的に：各カードの中心位置を計算して配置
-        // 1段目(row=0)は中央。
-        // col=0 の位置は?
-
-        // カード中心のX座標(%) = 50 + (col - row/2) * H_STEP
-        // H_STEPはカード幅に応じた適当な％
         const H_STEP = 14; // 横の間隔(%)
-        const V_STEP = 50; // 縦の間隔(px) ※CSS変数と合わせるべきだがJSで制御
+        const V_STEP = 50; // 縦の間隔(px)
 
         const xPercent = 50 + (col - row / 2) * H_STEP;
-        const yPx = row * V_STEP; // 上からの距離
+        const yPx = row * V_STEP;
 
         card.element.style.left = `${xPercent}%`;
         card.element.style.top = `${yPx}px`;
-
-        // 中心基準にするため、transformでずらす
         card.element.style.transform = `translate(-50%, 0)`;
-
-        // z-index調整（下段が上に来る必要はないが、重なり順序制御）
         card.element.style.zIndex = row + 1;
     }
 
-    /**
-     * 状態更新と再描画（主に選択可否の計算）
-     */
     updateView() {
         // 1. ピラミッドの選択可否判定
         for (let row = 0; row < 7; row++) {
             for (let col = 0; col < this.pyramid[row].length; col++) {
                 const card = this.pyramid[row][col];
-                if (!card) continue; // 消去済み
+                if (!card) continue;
 
-                // 選択可能かチェック
-                // 条件: 下の段(row+1)の col と col+1 にカードがない
                 let isBlocked = false;
-
-                if (row < 6) { // 最下段以外
+                if (row < 6) {
                     const leftChild = this.pyramid[row + 1][col];
                     const rightChild = this.pyramid[row + 1][col + 1];
-
                     if (leftChild || rightChild) {
                         isBlocked = true;
                     }
                 }
 
                 card.isSelectable = !isBlocked;
-                card.render(); // クラス更新
+                card.render();
             }
         }
 
@@ -334,61 +316,45 @@ class Game {
         if (this.stock.length > 0) {
             this.stockPile.style.visibility = 'visible';
             this.stockPile.classList.remove('empty');
-            // 一番上のカードを裏向きで表示（見た目だけ）
         } else {
-            // 山札切れ→リセット（一周のみなら非表示、再利用ならリセットアイコン等）
-            // ピラミッドソリティアの標準ルールでは、山札使い切りで詰みか、
-            // 何度でも回せるか、回数制限ありかバリエーションあり。
-            // ユーザー要件では「ストックが尽きて動けない場合はNew Game」なので、使い切りとする。
-            // しかし視覚的に「なくなった」ことを示す。
             this.stockPile.style.visibility = 'hidden';
         }
 
         // 3. 捨て札の表示更新
-        // 既存の表示済みカードを削除
         const oldWaste = this.wastePileContainer.querySelector('.card');
         if (oldWaste) oldWaste.remove();
 
         if (this.waste.length > 0) {
             const topWaste = this.waste[this.waste.length - 1];
             topWaste.isFaceUp = true;
-            topWaste.isSelectable = true; // 捨て札は常に選択可能
+            topWaste.isSelectable = true;
             const el = topWaste.render();
 
-            // 捨て札クリックイベント
-            // ※重要: 要素を作り直すのでイベントも再設定
-            // 既存のリスナーを削除する手間を省くため、ここではonclickプロパティ上書きは避け、
-            // 新規要素なのでaddEventListenerでOK
-            el.onclick = null; // 安全策
+            el.onclick = null;
             el.addEventListener('click', () => this.onCardClick(topWaste, 'waste'));
 
-            // 配置調整
             el.style.position = 'absolute';
             el.style.left = '0';
             el.style.top = '0';
-            el.style.transform = 'none'; // ピラミッド用のtransform解除
+            el.style.transform = 'none';
             el.style.zIndex = 10;
 
             this.wastePileContainer.appendChild(el);
         }
 
         this.updateCardCount();
+
+        // 手詰まり判定
+        if (this.gameState === 'PLAYING') {
+            this.checkGameOver();
+        }
     }
 
-    /**
-     * 山札をめくる
-     */
-    /**
-     * 山札をめくる
-     */
     drawCard() {
-        if (this.isProcessing) return;
-        if (this.stock.length === 0) {
-            // 山札が空の場合
-            return;
-        }
+        if (this.isProcessing || this.gameState !== 'PLAYING') return;
+        if (this.stock.length === 0) return;
 
-        // 選択状態の解除（山札めくると選択リセット）
+        // 選択状態の解除
         if (this.selectedCards.length > 0) {
             [...this.selectedCards].forEach(c => this.deselectCard(c));
         }
@@ -398,14 +364,13 @@ class Game {
         this.updateView();
     }
 
-    /**
-     * カードクリック時の処理
-     */
     onCardClick(card, location, row, col) {
-        if (this.isProcessing) return;
+        if (this.isProcessing || this.gameState !== 'PLAYING') return;
         if (!card.isSelectable) return;
 
-        // 既に選択済みのカードをタップ -> 解除
+        // ヒントハイライトがあれば消す
+        this.clearHintHighlights();
+
         if (card.isSelected) {
             this.deselectCard(card);
             return;
@@ -414,27 +379,21 @@ class Game {
         // K(=13)は単体で消える
         if (card.number === 13) {
             this.removeCard(card, location, row, col);
-
-            // 特定の効果音や演出を入れるならここ
             return;
         }
 
-        // 選択処理
         this.selectCard(card, location, row, col);
     }
 
     selectCard(card, location, row, col) {
         card.isSelected = true;
-
-        // 参照情報を付与しておく
         card._location = location;
         card._row = row;
         card._col = col;
 
         this.selectedCards.push(card);
-        card.render(); // 表示更新
+        card.render();
 
-        // カードが2枚選択されたら判定
         if (this.selectedCards.length === 2) {
             this.checkPair();
         }
@@ -442,22 +401,16 @@ class Game {
 
     deselectCard(card) {
         card.isSelected = false;
-
-        // 配列から削除
         this.selectedCards = this.selectedCards.filter(c => c.id !== card.id);
-
         card.render();
     }
 
     checkPair() {
-        this.isProcessing = true; // 操作ブロック
-
+        this.isProcessing = true;
         const c1 = this.selectedCards[0];
         const c2 = this.selectedCards[1];
 
         if (c1.number + c2.number === 13) {
-            // マッチ成立！
-            // 少し遅延させて消すとわかりやすい
             setTimeout(() => {
                 this.removeCard(c1, c1._location, c1._row, c1._col);
                 this.removeCard(c2, c2._location, c2._row, c2._col);
@@ -465,39 +418,30 @@ class Game {
                 // removeCard内でisProcessing解除される
 
                 // 応援メッセージ
-                this.showCheerMessage();
+                this.cheerMiyacchi(true); // 成功時は高確率で褒める
             }, 200);
         } else {
-            // マッチ不成立
             setTimeout(() => {
                 this.deselectCard(c1);
                 this.deselectCard(c2);
-                this.isProcessing = false; // 解除
+                this.isProcessing = false;
+                this.sayMessage('miyacchi', 'うーん、違うかも？');
             }, 300);
         }
     }
 
     removeCard(card, location, row, col) {
-        // データから削除
         if (location === 'pyramid') {
-            // 配列の該当箇所をnullにする（順序維持のためspliceはダメ）
             this.pyramid[row][col] = null;
         } else if (location === 'waste') {
-            // 捨て札から削除
-            // this.waste はスタック構造。一番上が消えるはず。
-            // ただし「選択中に山札めくって下に埋もれた」ケースは考慮必要だが、
-            // 今回のUIルールではめくるとwasteの一番上しか触れないので大丈夫。
-            // 念のためIDチェック
             const index = this.waste.findIndex(c => c.id === card.id);
             if (index !== -1) {
                 this.waste.splice(index, 1);
             }
         }
 
-        // 選択リストから除外
         this.selectedCards = this.selectedCards.filter(c => c.id !== card.id);
 
-        // DOM削除アニメーション
         card.element.style.transform = 'scale(0) rotate(180deg)';
         card.element.style.opacity = '0';
 
@@ -505,38 +449,15 @@ class Game {
             if (card.element.parentNode) {
                 card.element.parentNode.removeChild(card.element);
             }
-            this.updateView(); // 画面更新（下のカードが選択可能になるかも）
+            this.updateView();
+            // checkWinConditionはupdateView後のcheckGameOver内で兼ねてもいいが、
+            // 勝敗判定は即座に行いたいのでここで呼ぶ
             this.checkWinCondition();
-            this.isProcessing = false; // 解除
+            this.isProcessing = false;
         }, 300);
     }
 
-    showCheerMessage() {
-        // ランダムにキャラ選択 (0: ゆかりん, 1: みやっち)
-        const chara = Math.random() < 0.5 ? 'yukarin' : 'miyacchi';
-        const message = CHEER_MESSAGES[Math.floor(Math.random() * CHEER_MESSAGES.length)];
-
-        let bubble;
-        if (chara === 'yukarin') {
-            bubble = this.yukarinBubble;
-        } else {
-            bubble = this.miyacchiBubble;
-        }
-
-        if (bubble) {
-            bubble.textContent = message;
-            bubble.classList.remove('hidden');
-
-            // 数秒後に隠す
-            // 既存のタイマーがあればクリアしたいが、簡易的に上書き
-            setTimeout(() => {
-                bubble.classList.add('hidden');
-            }, 2000);
-        }
-    }
-
     updateCardCount() {
-        // ピラミッドに残っている枚数をカウント
         let count = 0;
         for (let row of this.pyramid) {
             for (let card of row) {
@@ -549,12 +470,157 @@ class Game {
 
     checkWinCondition() {
         if (this.score === 0) {
-            // クリア！
+            this.gameState = 'CLEAR';
             setTimeout(() => {
                 this.clearOverlay.classList.remove('hidden');
-                // 花吹雪などの演出があればここ
             }, 500);
         }
+    }
+
+    // 手詰まり判定
+    checkGameOver() {
+        if (this.gameState !== 'PLAYING') return;
+
+        // 山札があるうちはまだ手詰まりではない
+        if (this.stock.length > 0) return;
+
+        // 有効な手があるか？
+        if (this.hasValidMoves()) return;
+
+        // 手詰まり確定
+        this.gameState = 'GAMEOVER';
+        setTimeout(() => {
+            this.sayMessage('miyacchi', 'もう動かせないみたい…');
+            this.gameOverOverlay.classList.remove('hidden');
+        }, 1000);
+    }
+
+    // 有効手があるかチェック
+    hasValidMoves() {
+        // 選択可能な全カードリストを作成
+        let activeCards = [];
+
+        // ピラミッド上の選択可能カード
+        for (let row = 0; row < 7; row++) {
+            for (let col = 0; col < this.pyramid[row].length; col++) {
+                const c = this.pyramid[row][col];
+                if (c && c.isSelectable) activeCards.push(c);
+            }
+        }
+
+        // 捨て札の一番上
+        if (this.waste.length > 0) {
+            activeCards.push(this.waste[this.waste.length - 1]);
+        }
+
+        // K(13)があるか？
+        if (activeCards.some(c => c.number === 13)) return true;
+
+        // ペアがあるか？
+        for (let i = 0; i < activeCards.length; i++) {
+            for (let j = i + 1; j < activeCards.length; j++) {
+                if (activeCards[i].number + activeCards[j].number === 13) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    // ヒント機能（ゆかりん担当）
+    showHint() {
+        if (this.gameState !== 'PLAYING') return;
+
+        this.clearHintHighlights();
+
+        // 1. K(13)があればそれを教える
+        let activeCards = this.getAllActiveCards();
+        let kings = activeCards.filter(c => c.number === 13);
+
+        if (kings.length > 0) {
+            // ピラミッド上のKを優先
+            let pyramidKing = kings.find(c => this.isCardInPyramid(c));
+            let target = pyramidKing || kings[0];
+
+            this.highlightCard(target);
+            this.sayMessage('yukarin', 'これが消せるよ！');
+            return;
+        }
+
+        // 2. ペアを探す
+        for (let i = 0; i < activeCards.length; i++) {
+            for (let j = i + 1; j < activeCards.length; j++) {
+                if (activeCards[i].number + activeCards[j].number === 13) {
+                    this.highlightCard(activeCards[i]);
+                    this.highlightCard(activeCards[j]);
+                    this.sayMessage('yukarin', 'このペアで13になるよ！');
+                    return;
+                }
+            }
+        }
+
+        // 3. ペアが見つからない場合
+        if (this.stock.length > 0) {
+            this.sayMessage('yukarin', '山札をめくってみよう！');
+        } else {
+            this.sayMessage('yukarin', 'うーん、厳しいかも…');
+        }
+    }
+
+    getAllActiveCards() {
+        let activeCards = [];
+        // ピラミッド
+        for (let row = 0; row < 7; row++) {
+            for (let col = 0; col < this.pyramid[row].length; col++) {
+                const c = this.pyramid[row][col];
+                if (c && c.isSelectable) activeCards.push(c);
+            }
+        }
+        // 捨て札
+        if (this.waste.length > 0) {
+            activeCards.push(this.waste[this.waste.length - 1]);
+        }
+        return activeCards;
+    }
+
+    isCardInPyramid(card) {
+        // 簡易判定：location情報を持たせていない場合もあるが、waste配列に含まれていなければピラミッド
+        return !this.waste.includes(card);
+    }
+
+    highlightCard(card) {
+        if (card.element) {
+            card.element.classList.add('hint-highlight');
+        }
+    }
+
+    clearHintHighlights() {
+        const highlighted = document.querySelectorAll('.hint-highlight');
+        highlighted.forEach(el => el.classList.remove('hint-highlight'));
+    }
+
+    sayMessage(chara, msg) {
+        const bubble = chara === 'yukarin' ? this.yukarinBubble : this.miyacchiBubble;
+        bubble.textContent = msg;
+        bubble.classList.remove('hidden');
+
+        // アニメーション再開のためにクラスを付け直すなどの工夫もできるが、今回はシンプルに
+        setTimeout(() => {
+            bubble.classList.add('hidden');
+        }, 3000);
+    }
+
+    // 応援・リアクション（みやっち担当）
+    cheerMiyacchi(force = false) {
+        if (!force && Math.random() > 0.4) return; // 頻度調整
+
+        const messages = [
+            "ナイス！", "いい感じ！", "すごいすごい！", "その調子！",
+            "やる〜！", "完璧！", "天才かも！？", "ファイト！"
+        ];
+        const msg = messages[Math.floor(Math.random() * messages.length)];
+        this.sayMessage('miyacchi', msg);
     }
 }
 
