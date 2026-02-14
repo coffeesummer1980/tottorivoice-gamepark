@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ゆいくんのピラミッドソリティア</title>
+    <title>ゆいくんのピラミッドくずし</title>
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -13,7 +13,7 @@
 
     <div class="game-container">
         <header>
-            <h1>ゆいくんのピラミッドソリティア</h1>
+            <h1>ゆいくんのピラミッドくずし</h1>
             <div class="controls">
                 <button id="new-game-btn" class="btn">New Game</button>
                 <div class="score-board">残り: <span id="card-count">28</span>枚</div>
@@ -54,14 +54,18 @@
         <!-- スタート画面オーバーレイ -->
         <div id="start-overlay" class="overlay">
             <div class="overlay-content">
-                <h2>ピラミッドソリティア</h2>
+                <h2>ゆいくんのピラミッドくずし</h2>
                 <img src="assets/yuikun_spade.png" style="width: 80px; margin: 10px auto; display: block;">
                 <p>カードを2枚選んで<br>合計「13」を作って消そう！</p>
                 <div class="rule-description">
                     <p>K(13)は1枚で消せます。</p>
+                    <p>困ったら<strong>ゆかりん</strong>をタップ！<br>ヒントがもらえるよ💡</p>
                     <p>全てのカードを消すとクリア！</p>
                 </div>
                 <button id="start-btn" class="btn primary">ゲームスタート</button>
+                <br><br>
+                <a href="../index.html" class="btn"
+                    style="background-color: #95a5a6; font-size: 0.9rem; text-decoration: none; display: inline-block;">ゲームパークへ戻る</a>
             </div>
         </div>
 
