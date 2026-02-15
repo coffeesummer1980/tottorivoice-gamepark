@@ -209,72 +209,37 @@ class Game {
         }
     }
 
-    async startNewGame() {
-        try {
-            this.startBtn.textContent = '準備中...';
-            this.startBtn.disabled = true;
+    startNewGame() {
+        this.gameState = 'PLAYING';
 
-            // UIレンダリングのために少し待つ
-            await new Promise(resolve => setTimeout(resolve, 50));
+        // 即座に開始（ソルバー廃止）
+        this.deck = this.createDeck();
+        this.shuffleDeck();
 
-            this.gameState = 'PLAYING';
+        // 状態リセット
+        this.pyramid = [];
+        this.stock = [];
+        this.waste = [];
+        this.selectedCards = [];
+        this.pyramidContainer.innerHTML = '';
 
-            // 解けるデッキを探す（最大5回試行に減らす）
-            let solvableDeck = null;
-            for (let i = 0; i < 5; i++) {
-                let tempDeck = this.createDeck();
-                this.shuffleArray(tempDeck);
-                if (this.isSolvable(tempDeck)) {
-                    solvableDeck = tempDeck;
-                    console.log(`Solvable deck found after ${i + 1} attempts.`);
-                    break;
-                }
-            }
+        // waste表示エリアのクリア
+        const currentWasteCard = this.wastePileContainer.querySelector('.card');
+        if (currentWasteCard) currentWasteCard.remove();
 
-            // 見つかればそれを使う、なければ最後のランダム（運任せ）
-            this.deck = solvableDeck || this.createDeck();
-            if (!solvableDeck) {
-                console.log("Could not find a guaranteed solvable deck, using random.");
-                this.shuffleDeck();
-            }
+        // オーバーレイ隠し
+        this.startOverlay.classList.add('hidden');
+        this.gameOverOverlay.classList.add('hidden');
+        this.clearOverlay.classList.add('hidden');
 
-            // 状態リセット
-            this.pyramid = [];
-            this.stock = [];
-            this.waste = [];
-            this.selectedCards = [];
-            this.pyramidContainer.innerHTML = '';
+        // カードを配る
+        this.dealCards();
 
-            // waste表示エリアのクリア
-            const currentWasteCard = this.wastePileContainer.querySelector('.card');
-            if (currentWasteCard) currentWasteCard.remove();
+        // 残りを山札へ
+        this.stock = [...this.deck];
 
-            // オーバーレイ隠し
-            this.startOverlay.classList.add('hidden');
-            this.gameOverOverlay.classList.add('hidden');
-            this.clearOverlay.classList.add('hidden');
-
-            // カードを配る
-            this.dealCards();
-
-            // DOMに追加されたか確認（デバッグ用）
-            if (this.pyramidContainer.children.length !== 28) {
-                alert(`Error: Only ${this.pyramidContainer.children.length} cards rendered!`);
-            }
-
-            // 残りを山札へ
-            this.stock = [...this.deck];
-
-            this.updateView();
-            this.updateCardCount();
-
-        } catch (e) {
-            console.error(e);
-            alert('エラーが発生しました: ' + e.message);
-        } finally {
-            this.startBtn.textContent = 'ゲームスタート';
-            this.startBtn.disabled = false;
-        }
+        this.updateView();
+        this.updateCardCount();
     }
 
     // 配列シャッフル用ヘルパー
