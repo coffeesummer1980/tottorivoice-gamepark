@@ -257,6 +257,11 @@ class Game {
             // カードを配る
             this.dealCards();
 
+            // DOMに追加されたか確認（デバッグ用）
+            if (this.pyramidContainer.children.length !== 28) {
+                alert(`Error: Only ${this.pyramidContainer.children.length} cards rendered!`);
+            }
+
             // 残りを山札へ
             this.stock = [...this.deck];
 
@@ -478,8 +483,8 @@ class Game {
     }
 
     positionCard(card, row, col) {
-        const H_STEP = 14; // 横の間隔(%)
-        const V_STEP = 50; // 縦の間隔(px)
+        const H_STEP = 14;
+        const V_STEP = 50;
 
         const xPercent = 50 + (col - row / 2) * H_STEP;
         const yPx = row * V_STEP;
@@ -487,7 +492,9 @@ class Game {
         card.element.style.left = `${xPercent}%`;
         card.element.style.top = `${yPx}px`;
         card.element.style.transform = `translate(-50%, 0)`;
-        card.element.style.zIndex = row + 1;
+        card.element.style.zIndex = 100 + row; // Z-Indexを大幅に上げて手前に表示
+        card.element.style.opacity = '1'; // 強制的に不透明
+        card.element.style.display = 'flex'; // 強制的に表示
     }
 
     updateView() {
