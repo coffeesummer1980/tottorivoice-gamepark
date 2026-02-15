@@ -209,53 +209,67 @@ class Game {
         }
     }
 
-    startNewGame() {
-        this.gameState = 'PLAYING';
+    async startNewGame() {
+        try {
+            this.startBtn.textContent = '準備中...';
+            this.startBtn.disabled = true;
 
-        // 解けるデッキを探す（最大100回試行）
-        // ※完全なソルバーではないため、"解けると判定された"ものを優先する
-        let solvableDeck = null;
-        for (let i = 0; i < 100; i++) {
-            let tempDeck = this.createDeck();
-            this.shuffleArray(tempDeck); // ヘルパーメソッド使用
-            if (this.isSolvable(tempDeck)) {
-                solvableDeck = tempDeck;
-                console.log(`Solvable deck found after ${i + 1} attempts.`);
-                break;
+            // UIレンダリングのために少し待つ
+            await new Promise(resolve => setTimeout(resolve, 50));
+
+            this.gameState = 'PLAYING';
+
+            // 解けるデッキを探す（最大5回試行に減らす）
+            let solvableDeck = null;
+            for (let i = 0; i < 5; i++) {
+                let tempDeck = this.createDeck();
+                this.shuffleArray(tempDeck);
+                if (this.isSolvable(tempDeck)) {
+                    solvableDeck = tempDeck;
+                    console.log(`Solvable deck found after ${i + 1} attempts.`);
+                    break;
+                }
             }
+
+            // 見つかればそれを使う、なければ最後のランダム（運任せ）
+            this.deck = solvableDeck || this.createDeck();
+            if (!solvableDeck) {
+                console.log("Could not find a guaranteed solvable deck, using random.");
+                this.shuffleDeck();
+            }
+
+            // 状態リセット
+            this.pyramid = [];
+            this.stock = [];
+            this.waste = [];
+            this.selectedCards = [];
+            this.pyramidContainer.innerHTML = '';
+
+            // waste表示エリアのクリア
+            const currentWasteCard = this.wastePileContainer.querySelector('.card');
+            if (currentWasteCard) currentWasteCard.remove();
+
+            // オーバーレイ隠し
+            this.startOverlay.classList.add('hidden');
+            this.gameOverOverlay.classList.add('hidden');
+            this.clearOverlay.classList.add('hidden');
+
+            // カードを配る
+            this.dealCards();
+
+            // 残りを山札へ
+            this.stock = [...this.deck];
+
+            this.updateView();
+            this.updateCardCount();
+
+        } catch (e) {
+            console.error(e);
+            alert('エラーが発生しました: ' + e.message);
+        } finally {
+            this.startBtn.textContent = 'ゲームスタート';
+            this.startBtn.disabled = false;
         }
-
-        // 見つかればそれを使う、なければ最後のランダム（運任せ）
-        this.deck = solvableDeck || this.createDeck();
-        if (!solvableDeck) {
-            console.log("Could not find a guaranteed solvable deck, using random.");
-            this.shuffleDeck();
-        }
-
-        // 状態リセット
-        this.pyramid = [];
-        this.stock = [];
-        this.waste = [];
-        this.selectedCards = [];
-        this.pyramidContainer.innerHTML = '';
-
-        // waste表示エリアのクリア
-        const currentWasteCard = this.wastePileContainer.querySelector('.card');
-        if (currentWasteCard) currentWasteCard.remove();
-
-        // オーバーレイ隠し
-        this.startOverlay.classList.add('hidden');
-        this.gameOverOverlay.classList.add('hidden');
-        this.clearOverlay.classList.add('hidden');
-
-        // カードを配る
-        this.dealCards();
-
-        // 残りを山札へ
-        this.stock = [...this.deck];
-
-        this.updateView();
-        this.updateCardCount();
     }
 
     // 配列シャッフル用ヘルパー
@@ -318,7 +332,7 @@ class Game {
         if (pyramidCount === 0) return true;
 
         // 深さ制限（探索爆発防止）
-        if (depth > 200) return false;
+        if (depth > 100) return false;
 
         // 状態ハッシュ（簡易）
         // 本当はSetで訪問済みチェックすべきだが、ピラミッドの状態とWasteの状態がキー
@@ -697,11 +711,12 @@ class Game {
     checkGameOver() {
         if (this.gameState !== 'PLAYING') return;
 
-        // 山札または捨て札があるうちは、リサイクル可能なので手詰まりではない
-        if (this.stock.length > 0 || this.waste.length > 0) return;
-
-        // 有効な手があるか？
+        // 1. 現在の盤面で打てる手があるか？
         if (this.hasValidMoves()) return;
+
+        // 2. 山札・捨て札の中に、盤面のカードを消せる（またはKである）カードがあるか？
+        // リサイクル可能なので、埋もれているカードも全て候補とする
+        if (this.canDeckHelp()) return;
 
         // 手詰まり確定
         this.gameState = 'GAMEOVER';
@@ -744,6 +759,34 @@ class Game {
         return false;
     }
 
+    // デッキ（山札＋捨て札）の中に助けになるカードがあるか判定
+    canDeckHelp() {
+        // 全ての持ち札（山札＋捨て札）
+        const allDeckCards = [...this.stock, ...this.waste];
+        const deckRanks = new Set(allDeckCards.map(c => c.number));
+
+        // 1. K(13) があれば単体で消せるのでOK
+        if (deckRanks.has(13)) return true;
+
+        // 2. ピラミッド上の選択可能カードとペアになる数値があるか
+        const exposedPyramidCards = [];
+        for (let row = 0; row < 7; row++) {
+            for (let col = 0; col < this.pyramid[row].length; col++) {
+                const c = this.pyramid[row][col];
+                if (c && c.isSelectable) {
+                    exposedPyramidCards.push(c);
+                }
+            }
+        }
+
+        for (const pCard of exposedPyramidCards) {
+            const target = 13 - pCard.number;
+            if (deckRanks.has(target)) return true;
+        }
+
+        return false;
+    }
+
     // ヒント機能（ゆかりん担当）
     showHint() {
         if (this.gameState !== 'PLAYING') return;
@@ -779,6 +822,8 @@ class Game {
         // 3. ペアが見つからない場合
         if (this.stock.length > 0) {
             this.sayMessage('yukarin', '山札をめくってみよう！');
+        } else if (this.waste.length > 0) {
+            this.sayMessage('yukarin', '山札(空)をタップしてリセット！');
         } else {
             this.sayMessage('yukarin', 'うーん、厳しいかも…');
         }

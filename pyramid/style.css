@@ -261,20 +261,42 @@ main {
     border-radius: 8px;
 }
 
+/* リサイクルボタン（山札切れ時） */
 .card.refresh {
-    background: rgba(255, 255, 255, 0.2);
-    border: 2px dashed rgba(255, 255, 255, 0.5);
+    background: rgba(46, 204, 113, 0.3);
+    /* 緑がかった半透明 */
+    border: 3px solid #f1c40f;
+    /* 黄色の目立つ枠線 */
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 2rem;
-    color: white;
+    font-size: 2.5rem;
+    color: #f1c40f;
     cursor: pointer;
+    animation: pulseBorder 2s infinite;
 }
 
 .card.refresh::after {
     content: '↻';
     font-weight: bold;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+@keyframes pulseBorder {
+    0% {
+        box-shadow: 0 0 0 0 rgba(241, 196, 15, 0.7);
+        transform: scale(1);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(241, 196, 15, 0);
+        transform: scale(1.02);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(241, 196, 15, 0);
+        transform: scale(1);
+    }
 }
 
 /* 山札と捨て札のカード位置調整 */
