@@ -409,7 +409,8 @@ main {
 /* 吹き出し */
 .bubble {
     position: absolute;
-    bottom: 80%;
+    bottom: 110%;
+    /* より上に配置 */
     /* キャラの上に配置 */
     background: white;
     padding: 8px 12px;
@@ -424,6 +425,8 @@ main {
     animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     opacity: 1;
     transition: opacity 0.5s;
+    z-index: 100;
+    /* 重なり防止 */
 }
 
 .bubble.hidden {

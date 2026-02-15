@@ -6,10 +6,6 @@
  * - Gameクラス: ゲーム全体の進行管理、状態管理
  */
 
-window.onerror = function (message, source, lineno, colno, error) {
-    alert('Global Error: ' + message + '\nLine: ' + lineno);
-};
-
 // 定数定義
 const SUITS = ['♠', '♥', '♦', '♣'];
 const RANKS = [
