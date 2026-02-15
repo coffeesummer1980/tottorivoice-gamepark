@@ -261,6 +261,22 @@ main {
     border-radius: 8px;
 }
 
+.card.refresh {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px dashed rgba(255, 255, 255, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    color: white;
+    cursor: pointer;
+}
+
+.card.refresh::after {
+    content: '↻';
+    font-weight: bold;
+}
+
 /* 山札と捨て札のカード位置調整 */
 #stock-pile,
 #waste-pile .card {
@@ -488,6 +504,7 @@ main {
 .character-box {
     cursor: pointer;
     transition: transform 0.2s;
+    pointer-events: auto;
 }
 
 .character-box:active {

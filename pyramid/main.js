@@ -211,8 +211,26 @@ class Game {
 
     startNewGame() {
         this.gameState = 'PLAYING';
-        this.deck = this.createDeck();
-        this.shuffleDeck();
+
+        // 解けるデッキを探す（最大100回試行）
+        // ※完全なソルバーではないため、"解けると判定された"ものを優先する
+        let solvableDeck = null;
+        for (let i = 0; i < 100; i++) {
+            let tempDeck = this.createDeck();
+            this.shuffleArray(tempDeck); // ヘルパーメソッド使用
+            if (this.isSolvable(tempDeck)) {
+                solvableDeck = tempDeck;
+                console.log(`Solvable deck found after ${i + 1} attempts.`);
+                break;
+            }
+        }
+
+        // 見つかればそれを使う、なければ最後のランダム（運任せ）
+        this.deck = solvableDeck || this.createDeck();
+        if (!solvableDeck) {
+            console.log("Could not find a guaranteed solvable deck, using random.");
+            this.shuffleDeck();
+        }
 
         // 状態リセット
         this.pyramid = [];
@@ -225,7 +243,7 @@ class Game {
         const currentWasteCard = this.wastePileContainer.querySelector('.card');
         if (currentWasteCard) currentWasteCard.remove();
 
-        // オーバーレイ隠し（念の為）
+        // オーバーレイ隠し
         this.startOverlay.classList.add('hidden');
         this.gameOverOverlay.classList.add('hidden');
         this.clearOverlay.classList.add('hidden');
@@ -238,6 +256,173 @@ class Game {
 
         this.updateView();
         this.updateCardCount();
+    }
+
+    // 配列シャッフル用ヘルパー
+    shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    // ソルバー（簡易シミュレーション）
+    isSolvable(deck) {
+        // デッキをコピーしてシミュレーション用の状態を作成
+        // 注意: Cardオブジェクトの参照を切る必要はないが、配列は別にする
+        // シミュレーションではカードの数値(number)だけ分かれば良い
+
+        const cardValues = deck.map(c => c.number);
+
+        // ピラミッド構築（28枚）
+        // 0段目: 1枚 (idx 0)
+        // 1段目: 2枚 (idx 1-2)
+        // ...
+        // 6段目: 7枚 (idx 21-27)
+        // 合計: 28枚
+        // 配列の最後から取り出して配置するため、deckの末尾28枚がピラミッド
+        // 取り出し順序: row0-col0 -> row1-col0 -> row1-col1 ...
+        // dealCardsの実装を見ると:
+        // row=0..6, col=0..row { deck.pop() }
+        // つまり、deckの最後がrow0、その前がrow1...
+        // 逆順でシミュレートする必要がある
+
+        let simPyramid = []; // [row][col] -> value
+        let deckIdx = cardValues.length - 1;
+
+        for (let row = 0; row < 7; row++) {
+            simPyramid[row] = [];
+            for (let col = 0; col <= row; col++) {
+                simPyramid[row][col] = cardValues[deckIdx--];
+            }
+        }
+
+        // 残りが山札（stock）
+        // stockは配列として保持（deckの残り）
+        // 実際のゲームでは stock = [...deck] (popした後)
+        let simStock = cardValues.slice(0, deckIdx + 1);
+
+        // ソルバー実行
+        return this.solveRecursive(simPyramid, simStock, [], 0);
+    }
+
+    // 再帰探索（深さ制限・訪問済み管理あり）
+    solveRecursive(pyramid, stock, waste, depth) {
+        // ゴール判定: ピラミッドが空ならクリア
+        let pyramidCount = 0;
+        for (let r = 0; r < 7; r++) {
+            for (let c = 0; c < pyramid[r].length; c++) {
+                if (pyramid[r][c] !== null) pyramidCount++;
+            }
+        }
+        if (pyramidCount === 0) return true;
+
+        // 深さ制限（探索爆発防止）
+        if (depth > 200) return false;
+
+        // 状態ハッシュ（簡易）
+        // 本当はSetで訪問済みチェックすべきだが、ピラミッドの状態とWasteの状態がキー
+        // 今回は単純なDFSで、最初に見つけた勝ち筋を返す
+
+        // 有効な手を探す
+        // 1. ピラミッドの選択可能カードリスト
+        let activePyramidCards = [];
+        for (let r = 0; r < 7; r++) {
+            for (let c = 0; c < pyramid[r].length; c++) {
+                if (pyramid[r][c] === null) continue;
+
+                // ブロック判定
+                let isBlocked = false;
+                if (r < 6) {
+                    const left = pyramid[r + 1][c];
+                    const right = pyramid[r + 1][c + 1];
+                    if (left !== null || right !== null) isBlocked = true;
+                }
+
+                if (!isBlocked) {
+                    activePyramidCards.push({ val: pyramid[r][c], r: r, c: c, loc: 'p' });
+                }
+            }
+        }
+
+        let wasteTop = waste.length > 0 ? waste[waste.length - 1] : null;
+        let activeCards = [...activePyramidCards];
+        if (wasteTop !== null) {
+            activeCards.push({ val: wasteTop, loc: 'w' });
+        }
+
+        // 手の候補
+        // A. K(13)の除去
+        for (let c of activeCards) {
+            if (c.val === 13) {
+                // 実行して次へ
+                let nextPyramid = this.clonePyramid(pyramid);
+                let nextWaste = [...waste];
+                let nextStock = [...stock];
+
+                if (c.loc === 'p') nextPyramid[c.r][c.c] = null;
+                else nextWaste.pop();
+
+                if (this.solveRecursive(nextPyramid, nextStock, nextWaste, depth + 1)) return true;
+            }
+        }
+
+        // B. ペア除去 (合計13)
+        // 組み合わせ: P-P, P-W
+        // W-Wは無い（Wasteの一番上しか使えないため）
+
+        // P-P
+        for (let i = 0; i < activePyramidCards.length; i++) {
+            for (let j = i + 1; j < activePyramidCards.length; j++) {
+                if (activePyramidCards[i].val + activePyramidCards[j].val === 13) {
+                    let nextPyramid = this.clonePyramid(pyramid);
+                    let nextWaste = [...waste];
+                    let nextStock = [...stock];
+
+                    let c1 = activePyramidCards[i];
+                    let c2 = activePyramidCards[j];
+                    nextPyramid[c1.r][c1.c] = null;
+                    nextPyramid[c2.r][c2.c] = null;
+
+                    if (this.solveRecursive(nextPyramid, nextStock, nextWaste, depth + 1)) return true;
+                }
+            }
+        }
+
+        // P-W
+        if (wasteTop !== null) {
+            for (let i = 0; i < activePyramidCards.length; i++) {
+                if (activePyramidCards[i].val + wasteTop === 13) {
+                    let nextPyramid = this.clonePyramid(pyramid);
+                    let nextWaste = [...waste];
+                    let nextStock = [...stock];
+
+                    let c1 = activePyramidCards[i];
+                    nextPyramid[c1.r][c1.c] = null;
+                    nextWaste.pop();
+
+                    if (this.solveRecursive(nextPyramid, nextStock, nextWaste, depth + 1)) return true;
+                }
+            }
+        }
+
+        // C. ドロー (Stock -> Waste)
+        if (stock.length > 0) {
+            let nextPyramid = this.clonePyramid(pyramid);
+            let nextWaste = [...waste];
+            let nextStock = [...stock];
+
+            let card = nextStock.pop();
+            nextWaste.push(card);
+
+            if (this.solveRecursive(nextPyramid, nextStock, nextWaste, depth + 1)) return true;
+        }
+
+        return false;
+    }
+
+    clonePyramid(pyramid) {
+        return pyramid.map(row => [...row]);
     }
 
     createDeck() {
@@ -312,12 +497,22 @@ class Game {
             }
         }
 
-        // 2. 山札の表示更新
+        // 2. 山札の表示更新（リサイクル対応）
+        this.stockPile.classList.remove('back', 'refresh', 'empty');
+        this.stockPile.innerHTML = '';
+
         if (this.stock.length > 0) {
             this.stockPile.style.visibility = 'visible';
-            this.stockPile.classList.remove('empty');
+            this.stockPile.classList.add('back');
+        } else if (this.waste.length > 0) {
+            // 山札切れだが捨て札がある場合 -> リサイクル可能
+            this.stockPile.style.visibility = 'visible';
+            this.stockPile.classList.add('refresh');
+            // CSSでアイコン表示
         } else {
+            // 完全な切れ
             this.stockPile.style.visibility = 'hidden';
+            this.stockPile.classList.add('empty');
         }
 
         // 3. 捨て札の表示更新
@@ -352,7 +547,28 @@ class Game {
 
     drawCard() {
         if (this.isProcessing || this.gameState !== 'PLAYING') return;
-        if (this.stock.length === 0) return;
+
+        // 山札切れ時のリサイクル処理
+        if (this.stock.length === 0) {
+            if (this.waste.length > 0) {
+                // 捨て札を山札に戻してシャッフル
+                this.stock = [...this.waste];
+                this.waste = [];
+                this.shuffleArray(this.stock); // シャッフルしてランダム性を追加
+
+                // 全てのカードを裏向きにする等の処理はCardクラスのrenderで処理されるが、
+                // 次にdrawされた時にisFaceUp=trueになる。
+                // stock内では特にフラグを戻す必要はないが、念のため
+                this.stock.forEach(c => {
+                    c.isFaceUp = false;
+                    c.isSelected = false;
+                });
+
+                this.updateView();
+                this.cheerMiyacchi(true); // リセット合図
+            }
+            return;
+        }
 
         // 選択状態の解除
         if (this.selectedCards.length > 0) {
@@ -481,8 +697,8 @@ class Game {
     checkGameOver() {
         if (this.gameState !== 'PLAYING') return;
 
-        // 山札があるうちはまだ手詰まりではない
-        if (this.stock.length > 0) return;
+        // 山札または捨て札があるうちは、リサイクル可能なので手詰まりではない
+        if (this.stock.length > 0 || this.waste.length > 0) return;
 
         // 有効な手があるか？
         if (this.hasValidMoves()) return;
