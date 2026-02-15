@@ -12,8 +12,10 @@ const clearOverlay = document.getElementById('clear-overlay');
 // 画面サイズ設定
 let width, height;
 function resize() {
-    width = window.innerWidth;
-    height = window.innerHeight;
+    // 最小サイズを保証して0除算などを防ぐ
+    width = Math.max(window.innerWidth, 320);
+    height = Math.max(window.innerHeight, 320);
+
     canvas.width = width;
     canvas.height = height;
 
@@ -24,9 +26,6 @@ function resize() {
     ctx.scale(dpr, dpr);
     canvas.style.width = width + 'px';
     canvas.style.height = height + 'px';
-
-    // 画面リサイズ時に星が画面外に行かないように調整（簡易的）
-    // 本格的には各星の相対位置を保存して再計算するが、今回は再配置しない
 }
 window.addEventListener('resize', resize);
 resize();
@@ -80,8 +79,6 @@ const levelEdges = [
     [0, 2], [0, 3], // 内部線
     [3, 5]          // 内部線
 ];
-// オイラーの公式 V-E+F=2 などを満たす平面グラフであることを確認
-// 初期配置で交差させておく
 
 let stars = [];
 let draggingStar = null;
@@ -102,12 +99,11 @@ function initGame() {
     // 画面中央を中心にある程度散らばらせる
     const centerX = width / 2;
     const centerY = height / 2;
-    const range = Math.min(width, height) * 0.35; // 画面幅の35%範囲
+    // 画面端に行き過ぎないように調整
+    const range = Math.min(width, height) * 0.35;
 
     for (let i = 0; i < 6; i++) {
-        // ランダム座標
-        // ただし極端に近い座標にならないように簡易チェックしてもいいが、
-        // ドラッグで直せるので単純なランダムにする
+        // 完全ランダム配置 (計算やループなしで即時開始)
         const angle = Math.random() * Math.PI * 2;
         const dist = Math.random() * range;
 
@@ -116,6 +112,10 @@ function initGame() {
 
         stars.push(new Star(i, x, y));
     }
+
+    // クリア判定はdrawループで行うが、
+    // 万が一最初からクリア状態でも即座にゲーム開始されるようにする
+    // 「思考」ループは一切なし
 }
 
 // ==========================================
@@ -143,7 +143,9 @@ function getLineIntersection(p1, p2, p3, p4) {
 
 // 全てのエッジの交差状態をチェック
 function checkIntersections() {
-    const edgeStates = levelEdges.map(() => false); // 各エッジの交差フラグ
+    if (stars.length === 0) return { edgeStates: [], totalIntersections: 0 };
+
+    const edgeStates = levelEdges.map(() => false);
     let totalIntersections = 0;
 
     for (let i = 0; i < levelEdges.length; i++) {
@@ -155,6 +157,9 @@ function checkIntersections() {
             const s2 = stars[e1[1]];
             const s3 = stars[e2[0]];
             const s4 = stars[e2[1]];
+
+            // 安全策：星が存在しない場合はスキップ
+            if (!s1 || !s2 || !s3 || !s4) continue;
 
             if (getLineIntersection(s1, s2, s3, s4)) {
                 edgeStates[i] = true;
@@ -179,7 +184,7 @@ function draw() {
     const { edgeStates, totalIntersections } = checkIntersections();
 
     // クリア判定
-    if (totalIntersections === 0 && !isGameClear && !draggingStar) {
+    if (totalIntersections === 0 && !isGameClear && !draggingStar && stars.length > 0) {
         // ドラッグ中でなく、交差ゼロならクリア
         gameClear();
     }
@@ -192,6 +197,8 @@ function draw() {
         const e = levelEdges[i];
         const s1 = stars[e[0]];
         const s2 = stars[e[1]];
+        if (!s1 || !s2) continue; // 安全策
+
         const isIntersecting = edgeStates[i];
 
         ctx.beginPath();
@@ -237,14 +244,6 @@ function getPointerPos(e) {
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
-    // Canvasの実際の解像度と表示サイズの比率を考慮
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-
-    // DPR補正済みコンテキストなので、論理座標(CSSピクセル)を返すだけで良いはずだが、
-    // ctx.scale(dpr, dpr) している場合、入力座標はCSSピクセルで扱うのが正解。
-    // ただし rect.left 等を引いた値そのままでOK
-
     return {
         x: clientX - rect.left,
         y: clientY - rect.top
@@ -253,7 +252,8 @@ function getPointerPos(e) {
 
 function handleStart(e) {
     if (isGameClear) return;
-    e.preventDefault();
+    // タッチ操作のデフォルト動作（スクロールなど）を防ぐ
+    if (e.cancelable) e.preventDefault();
 
     const pos = getPointerPos(e);
 
@@ -273,7 +273,7 @@ function handleStart(e) {
 
 function handleMove(e) {
     if (!draggingStar) return;
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
 
     const pos = getPointerPos(e);
     draggingStar.x = pos.x;
