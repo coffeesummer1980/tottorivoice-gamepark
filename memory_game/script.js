@@ -369,7 +369,7 @@ function gameClear() {
             const baseScore = currentPairs * 50;
             const penalty = missCount * 10;
             const finalScore = Math.max(10, baseScore - penalty);
-            GameParkSDK.recordGameResult(finalScore, 0.5);
+            GameParkSDK.recordGameResult(finalScore, Math.floor(finalScore * 0.5));
         }
 
         // Simple confetti or effect could go here

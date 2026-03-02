@@ -466,7 +466,7 @@ function showGameOver() {
     // SDK連携: スコアとコインを保存
     if (typeof GameParkSDK !== 'undefined') {
         // スイカゲームはスコアが高くなりやすいので調整 (0.5倍)
-        GameParkSDK.recordGameResult(Math.floor(currentScore * 0.5), 0.2);
+        GameParkSDK.recordGameResult(Math.floor(currentScore * 0.5), Math.floor((currentScore * 0.5) * 0.2));
     }
     gameOverScreen.classList.remove('hidden');
 }

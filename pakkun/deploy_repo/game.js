@@ -335,7 +335,7 @@ function gameOver() {
 
     // SDKに結果記録
     if (typeof GameParkSDK !== 'undefined') {
-        GameParkSDK.recordGameResult(score);
+        GameParkSDK.recordGameResult(score, Math.floor(score * 0.1));
     }
 
     setTimeout(() => {

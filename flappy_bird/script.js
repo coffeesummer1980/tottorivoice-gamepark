@@ -180,7 +180,7 @@ function gameOver() {
 
     // SDK Record
     if (typeof GameParkSDK !== 'undefined') {
-        GameParkSDK.recordGameResult(score * 20, 2.0); // Hard game, high reward
+        GameParkSDK.recordGameResult(score * 20, Math.floor(score * 20 * 2.0)); // Hard game, high reward
     }
 }
 
@@ -190,7 +190,7 @@ function gameClear() {
 
     // SDK Record
     if (typeof GameParkSDK !== 'undefined') {
-        GameParkSDK.recordGameResult((score * 10) + 500, 5.0); // Huge bonus
+        GameParkSDK.recordGameResult((score * 10) + 500, Math.floor(((score * 10) + 500) * 5.0)); // Huge bonus
     }
 }
 

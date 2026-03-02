@@ -684,7 +684,7 @@ function endGame() {
     // SDK Record
     if (typeof GameParkSDK !== 'undefined') {
         // Brain check score is vital, high reward
-        GameParkSDK.recordGameResult(state.score * 5, 2.0);
+        GameParkSDK.recordGameResult(state.score * 5, Math.floor(state.score * 5 * 2.0));
     }
 
     switchScreen('result');

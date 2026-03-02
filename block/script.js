@@ -541,7 +541,7 @@ function gameOver() {
 
     // SDK Record
     if (typeof GameParkSDK !== 'undefined') {
-        GameParkSDK.recordGameResult(state.score * 10, 0.5); // 1 block = 10 pts
+        GameParkSDK.recordGameResult(state.score * 10, Math.floor(state.score * 10 * 0.5)); // 1 block = 10 pts
     }
 }
 
@@ -554,6 +554,6 @@ function gameClear() {
     // SDK Record
     if (typeof GameParkSDK !== 'undefined') {
         const bonus = (currentLevel === 'hard' ? 1000 : (currentLevel === 'normal' ? 500 : 300));
-        GameParkSDK.recordGameResult((state.score * 10) + bonus, 1.0);
+        GameParkSDK.recordGameResult((state.score * 10) + bonus, Math.floor(((state.score * 10) + bonus) * 1.0));
     }
 }

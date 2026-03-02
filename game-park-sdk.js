@@ -37,12 +37,44 @@ const GameParkSDK = (function () {
         return 500 * lv * (lv - 1);
     }
 
+    const MAX_COINS_PER_DAY = 500;
+    const LOGIN_BONUS = 10;
+
     // --- State ---
     let state = {
         xp: 0,       // 累計経験値
         level: 1,    // 現在のレベル
         coins: 0,    // 所持コイン
+        dailyCoins: 0, // 今日の獲得コイン
+        lastCoinDate: '', // 最後にコインを獲得した日付 (YYYY-MM-DD)
+        lastLoginDate: '', // 最後にログインボーナスを受け取った日付
     };
+
+    // --- Private Methods ---
+
+    function getTodayString() {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function checkDailyCoinReset() {
+        const today = getTodayString();
+        if (state.lastCoinDate !== today) {
+            state.dailyCoins = 0;
+            state.lastCoinDate = today;
+        }
+    }
+
+    function checkLoginBonus() {
+        const today = getTodayString();
+        if (state.lastLoginDate !== today) {
+            state.lastLoginDate = today;
+            state.coins += LOGIN_BONUS;
+            saveData();
+            updateUI();
+            showToast(`ログインボーナス！ ${LOGIN_BONUS}G を獲得しました🎁`, 'level-up');
+        }
+    }
 
     // --- Private Methods ---
 
@@ -123,28 +155,74 @@ const GameParkSDK = (function () {
 
     /**
      * ゲーム終了時などに呼び出す
-     * @param {number} score - ゲームのスコア
-     * @param {number} coinMultiplier - スコアに対するコインの倍率 (デフォルト 0.1)
+     * @param {number} earnedXP - 獲得経験値
+     * @param {number} baseCoins - 獲得予定のコイン（上限到達前）
      */
-    function recordGameResult(score, coinMultiplier = 0.1) {
-        if (score <= 0) return;
+    function recordGameResult(earnedXP, baseCoins = 0) {
+        if (earnedXP <= 0 && baseCoins <= 0) return;
 
-        // XP加算 (スコアそのまま)
-        const earnedXP = Math.floor(score);
+        // XP加算
         state.xp += earnedXP;
 
-        // コイン加算 (スコア * 倍率)
-        const earnedCoins = Math.floor(score * coinMultiplier);
-        if (earnedCoins > 0) {
-            state.coins += earnedCoins;
-            showToast(`+${earnedXP} XP / +${earnedCoins} コイン獲得！`);
+        // 日付が変わっていればコイン獲得限度をリセット
+        checkDailyCoinReset();
+
+        // コイン加算 (1日の上限チェック)
+        let actualEarnedCoins = 0;
+        let limitReachedMsg = "";
+
+        if (baseCoins > 0) {
+            if (state.dailyCoins < MAX_COINS_PER_DAY) {
+                // 上限までの残り枠
+                const remainingLimit = MAX_COINS_PER_DAY - state.dailyCoins;
+                // 実際に獲得できるコインは、基本コイン数か、残り枠の小さい方
+                actualEarnedCoins = Math.min(baseCoins, remainingLimit);
+
+                state.coins += actualEarnedCoins;
+                state.dailyCoins += actualEarnedCoins;
+
+                if (state.dailyCoins >= MAX_COINS_PER_DAY) {
+                    limitReachedMsg = " (本日の上限500Gに達しました)";
+                }
+            } else {
+                limitReachedMsg = " (本日の上限到達済)";
+            }
+        }
+
+        if (actualEarnedCoins > 0) {
+            showToast(`+${earnedXP} XP / +${actualEarnedCoins} G 獲得！${limitReachedMsg}`);
         } else {
-            showToast(`+${earnedXP} XP 獲得！`);
+            showToast(`+${earnedXP} XP 獲得！${limitReachedMsg}`);
         }
 
         updateLevel();
         saveData();
         updateUI(); // UIがあれば更新
+    }
+
+    /**
+     * コインを消費する
+     */
+    function spendCoins(amount) {
+        if (state.coins >= amount) {
+            state.coins -= amount;
+            saveData();
+            updateUI();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 交換証明コード生成
+     */
+    function generateProofCode(length = 8) {
+        const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        let result = '';
+        for (let i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        return `TTV-${result}`;
     }
 
     /**
@@ -172,12 +250,16 @@ const GameParkSDK = (function () {
     }
 
     function getRankName(lv) {
-        if (lv >= 50) return "鳥取マスター";
-        if (lv >= 30) return "ゆいくんの親友";
-        if (lv >= 20) return "鳥取マニア";
+        if (lv >= 99) return "名誉鳥取県民";
+        if (lv >= 80) return "鳥取アンバサダー";
+        if (lv >= 60) return "鳥取マスター";
+        if (lv >= 50) return "鳥取エキスパート";
+        if (lv >= 40) return "鳥取オタク";
+        if (lv >= 30) return "鳥取マニア";
+        if (lv >= 20) return "鳥取ウォッチャー";
         if (lv >= 10) return "鳥取ファン";
-        if (lv >= 5) return "リピーター";
-        return "観光客";
+        if (lv >= 5) return "鳥取リピーター";
+        return "鳥取観光客";
     }
 
     /**
@@ -240,8 +322,8 @@ const GameParkSDK = (function () {
                     <!-- Bottom Row: Progress -->
                     <div class="gp-progress-area" style="width: 100%;">
                         <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #777; margin-bottom: 4px; font-weight: bold;">
-                            <span>EXP</span>
-                            <span id="gp-next-rank-info">次のランクまであと ...</span>
+                            <span>EXP <span id="gp-next-rank-info" style="font-weight: normal; margin-left: 8px;">次のランクまであと ...</span></span>
+                            <span>本日の獲得コイン： <span id="gp-disp-daily-coins">0</span> / 500 G</span>
                         </div>
                         <div style="background: #e0e0e0; height: 10px; border-radius: 5px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
                             <div id="gp-disp-bar" style="background: linear-gradient(90deg, #4CAF50, #81C784); width: 0%; height: 100%; transition: width 0.5s;"></div>
@@ -282,12 +364,16 @@ const GameParkSDK = (function () {
                         <button class="gp-modal-close" style="background: none; border: none; font-size: 1.5rem; color: #999; cursor: pointer; padding: 0; line-height: 1;">&times;</button>
                     </div>
                     <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.95rem; color: #444; display: flex; flex-direction: column; gap: 8px;">
-                        <li style="display: flex; justify-content: space-between; padding: 8px; background: #fafafa; border-radius: 8px;"><span>Lv.1〜</span> <strong>観光客</strong></li>
-                        <li style="display: flex; justify-content: space-between; padding: 8px; background: #f0f8ff; border-radius: 8px;"><span>Lv.5〜</span> <strong>リピーター</strong></li>
-                        <li style="display: flex; justify-content: space-between; padding: 8px; background: #e6f7ff; border-radius: 8px;"><span>Lv.10〜</span> <strong>鳥取ファン</strong></li>
-                        <li style="display: flex; justify-content: space-between; padding: 8px; background: #fff0f5; border-radius: 8px;"><span>Lv.20〜</span> <strong>鳥取マニア</strong></li>
-                        <li style="display: flex; justify-content: space-between; padding: 8px; background: #f5f5f5; border-radius: 8px; border: 1px solid gold;"><span>Lv.30〜</span> <strong style="color: #d4af37;">ゆいくんの親友</strong></li>
-                        <li style="display: flex; justify-content: space-between; padding: 8px; background: #fffacd; border-radius: 8px; border: 1px solid orange;"><span>Lv.50〜</span> <strong style="color: #ff8c00;">鳥取マスター</strong></li>
+                        <li style="display: flex; justify-content: space-between; padding: 6px; background: #fafafa; border-radius: 8px;"><span>Lv.1〜</span> <strong>鳥取観光客</strong></li>
+                        <li style="display: flex; justify-content: space-between; padding: 6px; background: #f0f8ff; border-radius: 8px;"><span>Lv.5〜</span> <strong>鳥取リピーター</strong></li>
+                        <li style="display: flex; justify-content: space-between; padding: 6px; background: #e6f7ff; border-radius: 8px;"><span>Lv.10〜</span> <strong>鳥取ファン</strong></li>
+                        <li style="display: flex; justify-content: space-between; padding: 6px; background: #e0f2f1; border-radius: 8px;"><span>Lv.20〜</span> <strong>鳥取ウォッチャー</strong></li>
+                        <li style="display: flex; justify-content: space-between; padding: 6px; background: #fff0f5; border-radius: 8px;"><span>Lv.30〜</span> <strong>鳥取マニア</strong></li>
+                        <li style="display: flex; justify-content: space-between; padding: 6px; background: #fce4ec; border-radius: 8px;"><span>Lv.40〜</span> <strong style="color: #d81b60;">鳥取オタク</strong></li>
+                        <li style="display: flex; justify-content: space-between; padding: 6px; background: #f3e5f5; border-radius: 8px; border: 1px solid silver;"><span>Lv.50〜</span> <strong style="color: #8e24aa;">鳥取エキスパート</strong></li>
+                        <li style="display: flex; justify-content: space-between; padding: 6px; background: #fffacd; border-radius: 8px; border: 1px solid gold;"><span>Lv.60〜</span> <strong style="color: #ff8c00;">鳥取マスター</strong></li>
+                        <li style="display: flex; justify-content: space-between; padding: 6px; background: #fff8e1; border-radius: 8px; border: 1px solid orange;"><span>Lv.80〜</span> <strong style="color: #ff6f00;">鳥取アンバサダー</strong></li>
+                        <li style="display: flex; justify-content: space-between; padding: 6px; background: #fff; border-radius: 8px; border: 2px solid red;"><span>Lv.99</span> <strong style="color: red;">名誉鳥取県民</strong></li>
                     </ul>
                 </div>
             `;
@@ -319,22 +405,34 @@ const GameParkSDK = (function () {
 
             // Shop Items Data
             const shopItems = [
-                { icon: 'wallpaper', name: '特製スマホ壁紙', price: 2500, desc: 'まずはここから！近日登場' },
-                { icon: 'graphic_eq', name: 'ゆいくんボイス', price: 10000, desc: '激レアボイス！準備中...' },
-                { icon: 'card_giftcard', name: 'リアル店舗クーポン', price: 50000, desc: 'やりこみ特典！計画中...' }
+                { id: 'item_wallpaper', icon: 'wallpaper', name: '特製スマホ壁紙等', price: 2500, desc: 'まずはここから！何が当たるかお楽しみ' },
+                { id: 'item_voice', icon: 'graphic_eq', name: 'ゆかりん等のボイス', price: 10000, desc: 'いろんなボイスをご用意！' },
+                { id: 'item_namecall', icon: 'record_voice_over', name: '動画でお名前読み上げ権', price: 10000, desc: 'メッセージを添えて読み上げます' },
+                { id: 'item_char', icon: 'badge', name: 'あなたをキャラ化します', price: 50000, desc: 'ゆかりん・みやっちテイストのイラストに！' }
             ];
 
             const itemsHtml = shopItems.map(item => `
-                <div style="display: flex; align-items: center; background: #fff; padding: 10px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 8px;">
-                    <div style="background: #FFF9C4; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #FBC02D; margin-right: 12px;">
-                        <span class="material-icons-round">${item.icon}</span>
+                <div style="display: flex; flex-direction: column; background: #fff; padding: 12px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                    <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                        <div style="background: #FFF9C4; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #FBC02D; margin-right: 12px; flex-shrink: 0;">
+                            <span class="material-icons-round">${item.icon}</span>
+                        </div>
+                        <div style="flex-grow: 1;">
+                            <div style="font-weight: bold; font-size: 0.95rem; color: #333;">${item.name}</div>
+                            <div style="font-size: 0.75rem; color: #888; margin-top: 2px;">${item.desc}</div>
+                        </div>
                     </div>
-                    <div style="flex-grow: 1;">
-                        <div style="font-weight: bold; font-size: 0.9rem; color: #333;">${item.name}</div>
-                        <div style="font-size: 0.75rem; color: #999;">${item.desc}</div>
-                    </div>
-                    <div style="font-weight: 900; color: #FF8C00; font-size: 0.9rem;">
-                        ${item.price.toLocaleString()} <span style="font-size: 0.7rem;">G</span>
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed #eee; padding-top: 8px;">
+                        <div style="font-weight: 900; color: #FF8C00; font-size: 1rem;">
+                            ${item.price.toLocaleString()} <span style="font-size: 0.75rem;">G</span>
+                        </div>
+                        <button class="gp-buy-btn" data-item-id="${item.id}" data-item-price="${item.price}" data-item-name="${item.name}" style="
+                            background: #4CAF50; color: white; border: none; padding: 6px 16px; border-radius: 20px; 
+                            font-size: 0.85rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px;
+                            box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3); transition: background 0.2s;
+                        ">
+                            <span class="material-icons-round" style="font-size: 14px;">shopping_cart_checkout</span> 交換
+                        </button>
                     </div>
                 </div>
             `).join('');
@@ -352,12 +450,14 @@ const GameParkSDK = (function () {
                         貯めたコインでアイテムと交換！<br>
                         <span style="font-size: 0.75rem;">※現在はプレビュー表示です</span>
                     </div>
-                    <div style="max-height: 300px; overflow-y: auto;">
+                    <div style="max-height: 400px; overflow-y: auto; padding-right: 4px; scrollbar-width: thin;">
                         ${itemsHtml}
                     </div>
                 </div>
                 <style>
                     @keyframes gpModalPop { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+                    .gp-buy-btn:hover { background: #43A047 !important; }
+                    .gp-buy-btn:disabled { background: #ccc !important; cursor: not-allowed !important; box-shadow: none !important; }
                 </style>
             `;
             document.body.appendChild(shopModal);
@@ -365,6 +465,41 @@ const GameParkSDK = (function () {
             // Close logic
             shopModal.onclick = (e) => { if (e.target === shopModal) shopModal.style.display = 'none'; };
             shopModal.querySelector('.gp-modal-close').onclick = () => shopModal.style.display = 'none';
+
+            // Buy Button Logic
+            const buyButtons = shopModal.querySelectorAll('.gp-buy-btn');
+            buyButtons.forEach(btn => {
+                btn.onclick = (e) => {
+                    const price = parseInt(btn.dataset.itemPrice, 10);
+                    const name = btn.dataset.itemName;
+
+                    if (state.coins < price) {
+                        alert(`「${name}」を交換するにはコインが足りません。\n（所持：${state.coins.toLocaleString()}G / 必要：${price.toLocaleString()}G）`);
+                        return;
+                    }
+
+                    if (confirm(`【${name}】\n${price.toLocaleString()}G を消費して交換しますか？\n\n※「OK」を押すと公式LINEが立ち上がり、アイテム受け取り用のメッセージが表示されます。そのまま送信してください。`)) {
+                        // コイン消費
+                        if (spendCoins(price)) {
+                            // 交換証明コード生成
+                            const proofCode = generateProofCode();
+                            const currentLvl = state.level;
+
+                            // LINEに送るメッセージを構築 (LINE公式アカウントのリンク)
+                            const message = `ゲームパークでアイテムを交換するよ！\n\n【交換アイテム】\n${name}\n\n【交換証明コード】\n${proofCode}\n\n【プレイヤー情報】\nLv.${currentLvl}\n\n※このメッセージをそのまま送信してください😊`;
+
+                            // LINE URL（LINE公式に送れるよう、URLパラメータやLINE URLスキームで飛ばす）
+                            const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(message)}`;
+
+                            alert(`交換が完了しました！\n\n証明コード：${proofCode}\n\n※公式LINEが開きますので、自動入力されたメッセージをそのまま送信してください。運営から手動でアイテムをお届けします。`);
+
+                            // モーダルを閉じてLINEを開く
+                            shopModal.style.display = 'none';
+                            window.open(lineUrl, '_blank');
+                        }
+                    }
+                };
+            });
         }
 
         // Setup Open Events
@@ -380,16 +515,18 @@ const GameParkSDK = (function () {
 
         updateUI();
 
-        // Welcome Toast
-        setTimeout(() => showToast('ゲームパークへようこそ！', 'info'), 500);
+        // Welcome Toast & Login Bonus
+        setTimeout(() => {
+            showToast('ゲームパークへようこそ！', 'info');
+            setTimeout(checkLoginBonus, 1500);
+        }, 500);
     }
 
     function getNextRankLevel(currentLv) {
-        if (currentLv < 5) return 5;
-        if (currentLv < 10) return 10;
-        if (currentLv < 20) return 20;
-        if (currentLv < 30) return 30;
-        if (currentLv < 50) return 50;
+        const levels = [5, 10, 20, 30, 40, 50, 60, 80, 99];
+        for (const lv of levels) {
+            if (currentLv < lv) return lv;
+        }
         return null; // Master
     }
 
@@ -400,12 +537,16 @@ const GameParkSDK = (function () {
         const elRank = document.getElementById('gp-disp-rank');
         const elBar = document.getElementById('gp-disp-bar');
         const elCoins = document.getElementById('gp-disp-coins');
+        const elDailyCoins = document.getElementById('gp-disp-daily-coins');
         const elNextRank = document.getElementById('gp-next-rank-info');
 
         if (elLevel) elLevel.textContent = info.level;
         if (elRank) elRank.textContent = info.rankName;
         if (elBar) elBar.style.width = `${info.nextLevelProgress}%`;
         if (elCoins) elCoins.textContent = info.coins.toLocaleString();
+
+        checkDailyCoinReset();
+        if (elDailyCoins) elDailyCoins.textContent = state.dailyCoins.toLocaleString();
 
         if (elNextRank) {
             const nextLv = getNextRankLevel(info.level);
@@ -417,6 +558,21 @@ const GameParkSDK = (function () {
             } else {
                 elNextRank.textContent = `最高ランク到達！`;
             }
+        }
+
+        const shopModal = document.getElementById('gp-shop-modal');
+        if (shopModal) {
+            const buyButtons = shopModal.querySelectorAll('.gp-buy-btn');
+            buyButtons.forEach(btn => {
+                const price = parseInt(btn.dataset.itemPrice, 10);
+                if (info.coins < price) {
+                    btn.style.opacity = '0.5';
+                    btn.querySelector('span.material-icons-round').textContent = 'lock';
+                } else {
+                    btn.style.opacity = '1';
+                    btn.querySelector('span.material-icons-round').textContent = 'shopping_cart_checkout';
+                }
+            });
         }
     }
 

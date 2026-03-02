@@ -375,7 +375,7 @@ function showClearModal() {
     // SDK Record
     if (typeof GameParkSDK !== 'undefined') {
         const bonus = (currentLevel === 'hard' ? 500 : (currentLevel === 'medium' ? 300 : 100));
-        GameParkSDK.recordGameResult(bonus, 0.5);
+        GameParkSDK.recordGameResult(bonus, Math.floor(bonus * 0.5));
     }
 }
 

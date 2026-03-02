@@ -311,6 +311,10 @@ function gameClear() {
     isGameClear = true;
     console.log("Game Clear!");
 
+    if (typeof GameParkSDK !== 'undefined') {
+        GameParkSDK.recordGameResult(100, 10); // Base 100XP, 10G limit basis
+    }
+
     // クリア表示
     setTimeout(() => {
         clearOverlay.classList.add('visible');
