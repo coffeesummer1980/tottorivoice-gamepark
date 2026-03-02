@@ -40,10 +40,19 @@
         <canvas id="gameCanvas"></canvas>
     </div>
 
-    <!-- Reset Button -->
-    <button id="reset-btn" class="reset-btn" aria-label="リセット">
-        <span class="material-icons-round">refresh</span>
-    </button>
+    <!-- Reference/Ghost View -->
+    <div id="ghost-container">
+        <canvas id="ghostCanvas"></canvas>
+        <span class="label">見本</span>
+    </div>
+
+    <!-- Controls -->
+    <div id="controls">
+        <button id="release-btn" class="control-btn" style="display: none;">はなす</button>
+        <button id="reset-btn" class="control-btn" aria-label="リセット">
+            <span class="material-icons-round">refresh</span>
+        </button>
+    </div>
 
     <!-- Clear Overlay -->
     <div id="clear-overlay">
@@ -54,9 +63,6 @@
             <a href="../index.html" class="btn btn-secondary">ホームへ</a>
         </div>
     </div>
-
-    <!-- Game Park SDK -->
-    <script src="../game-park-sdk.js"></script>
 
     <!-- Game Logic -->
     <script src="main.js?v=2"></script>
