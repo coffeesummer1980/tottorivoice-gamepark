@@ -478,24 +478,33 @@ const GameParkSDK = (function () {
                         return;
                     }
 
-                    if (confirm(`【${name}】\n${price.toLocaleString()}G を消費して交換しますか？\n\n※「OK」を押すと公式LINEが立ち上がり、アイテム受け取り用のメッセージが表示されます。そのまま送信してください。`)) {
+                    if (confirm(`【${name}】\n${price.toLocaleString()}G を消費して交換しますか？\n\n※「OK」を押すと受け取り用メッセージが作成され、公式LINEが開きます。`)) {
                         // コイン消費
                         if (spendCoins(price)) {
                             // 交換証明コード生成
                             const proofCode = generateProofCode();
                             const currentLvl = state.level;
 
-                            // LINEに送るメッセージを構築 (LINE公式アカウントのリンク)
+                            // LINEに送るメッセージを構築
                             const message = `ゲームパークでアイテムを交換するよ！\n\n【交換アイテム】\n${name}\n\n【交換証明コード】\n${proofCode}\n\n【プレイヤー情報】\nLv.${currentLvl}\n\n※このメッセージをそのまま送信してください😊`;
+                            const lineUrl = 'https://lin.ee/QOBXq34';
 
-                            // LINE URL（LINE公式に送れるよう、URLパラメータやLINE URLスキームで飛ばす）
-                            const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(message)}`;
-
-                            alert(`交換が完了しました！\n\n証明コード：${proofCode}\n\n※公式LINEが開きますので、自動入力されたメッセージをそのまま送信してください。運営から手動でアイテムをお届けします。`);
-
-                            // モーダルを閉じてLINEを開く
-                            shopModal.style.display = 'none';
-                            window.open(lineUrl, '_blank');
+                            // クリップボードにコピー
+                            if (navigator.clipboard) {
+                                navigator.clipboard.writeText(message).then(() => {
+                                    alert(`交換が完了しました！\n\n証明コード：${proofCode}\n\n※受け取り用メッセージを【コピー】しました！\n\n公式LINEが開きますので、トーク画面に「ペースト（貼り付け）」してそのまま送信してください。`);
+                                    shopModal.style.display = 'none';
+                                    window.open(lineUrl, '_blank');
+                                }).catch(() => {
+                                    alert(`交換が完了しました！\n\n証明コード：${proofCode}\n\n※以下のメッセージを公式LINEに送信してください：\n\n${message}`);
+                                    shopModal.style.display = 'none';
+                                    window.open(lineUrl, '_blank');
+                                });
+                            } else {
+                                alert(`交換が完了しました！\n\n証明コード：${proofCode}\n\n※以下のメッセージを公式LINEに送信してください：\n\n${message}`);
+                                shopModal.style.display = 'none';
+                                window.open(lineUrl, '_blank');
+                            }
                         }
                     }
                 };
