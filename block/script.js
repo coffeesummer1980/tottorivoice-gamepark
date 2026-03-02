@@ -64,20 +64,17 @@ const DIFFICULTIES = {
     easy: {
         rows: 5,
         cols: 6,
-        ballSpeed: 2.5,
-        img: 'sakyu.jpg'
+        ballSpeed: 2.5
     },
     normal: {
         rows: 8,
         cols: 8,
-        ballSpeed: 4,
-        img: 'shirakabe.jpg'
+        ballSpeed: 4
     },
     hard: {
         rows: 12,
         cols: 10,
-        ballSpeed: 6,
-        img: 'daisen.jpg'
+        ballSpeed: 6
     }
 };
 
@@ -106,22 +103,13 @@ window.addEventListener('load', () => {
 diffButtons.forEach(btn => {
     btn.addEventListener('click', () => {
         const level = btn.dataset.level;
-        const img = btn.dataset.img; // Get image directly from button data
-        startGame(level, img);
+        startGame(level, false);
     });
 });
 
 retryBtn.addEventListener('click', () => {
-    // Retry same level? Or go back to menu?
-    // Let's retry same level.
-    // Need to hide game over screen
     gameOverScreen.classList.remove('active'); // Hide overlay
-    // But we need to re-init game state.
-    // We don't have 'currentImage' set by retry button explicitly, 
-    // but 'startGame' uses 'currentLevel'. 
-    // Wait, startGame takes (level, img).
-    // Let's store currentImg when starting.
-    startGame(currentLevel, currentImage);
+    startGame(currentLevel, true);
 });
 
 
@@ -156,28 +144,19 @@ function resizeCanvas() {
     }
 }
 
-function startGame(level, imgObj) {
+function startGame(level, isRetry = false) {
     currentLevel = level;
-    // Handle image passing: could be string or object from previous state
-    // If called from button, it's string.
-    // However, DIFFICULTIES defines default img.
-    // But user might want specific one?
-    // Let's use the one from button mapping if available, otherwise config.
-    // Wait, button data-img is hardcoded in HTML.
 
-    let imgSrc = '';
-    if (typeof imgObj === 'string') {
-        imgSrc = imgObj;
-    } else {
-        imgSrc = DIFFICULTIES[level].img;
+    if (!isRetry) {
+        // 新規プレイ時はランダムに画像を選ぶ(1〜10)
+        const randomImageIndex = Math.floor(Math.random() * 10) + 1;
+        currentImage = `images/miyacchi_${randomImageIndex}.jpg`;
     }
-    currentImage = imgSrc; // Store for retry
 
     // Load Image
-    backgroundImage.src = imgSrc;
+    backgroundImage.src = currentImage;
     backgroundImage.onload = () => {
-        // Only start game loop logic once image is loaded?
-        // Or just let it render.
+        // 読み込み完了したら描画反映などに使える
     };
 
     // Reset State
