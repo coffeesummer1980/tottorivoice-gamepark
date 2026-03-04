@@ -33,8 +33,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    min-height: 100dvh;
+    height: 100dvh;
     overflow: hidden;
     /* Prevent scrolling while dragging */
 }
@@ -43,17 +42,13 @@ body {
     width: 100%;
     max-width: 600px;
     /* PC centered */
-    min-height: 600px;
+    height: 100dvh;
     background: #fff;
-    border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    margin: 10px;
+    padding: 10px 15px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    height: 95vh;
-    /* Fit within viewport */
     justify-content: space-between;
 }
 
@@ -158,6 +153,15 @@ h1 {
 }
 
 
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 0;
+    justify-content: center;
+}
+
 .game-board-wrapper {
     position: relative;
     width: 100%;
@@ -197,8 +201,8 @@ h1 {
 /* Responsive cell sizing */
 @media (max-width: 400px) {
     .cell {
-        width: 34px;
-        height: 34px;
+        width: 32px;
+        height: 32px;
         font-size: 1rem;
     }
 }
@@ -208,6 +212,31 @@ h1 {
         width: 28px;
         height: 28px;
         font-size: 0.9rem;
+    }
+}
+
+@media (max-height: 700px) {
+    .cell {
+        width: 30px;
+        height: 30px;
+        font-size: 0.9rem;
+    }
+
+    .word-list-container {
+        padding: 5px;
+        max-height: 25vh;
+    }
+}
+
+@media (max-height: 600px) {
+    .cell {
+        width: 25px;
+        height: 25px;
+        font-size: 0.8rem;
+    }
+
+    .character-area {
+        display: none;
     }
 }
 

@@ -30,7 +30,7 @@ body {
     font-family: var(--font-main);
     background-color: var(--bg-color);
     color: white;
-    height: 100vh;
+    height: 100dvh;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -41,7 +41,7 @@ body {
 .game-container {
     width: 100%;
     max-width: 600px;
-    height: 100%;
+    height: 100dvh;
     background-color: var(--table-color);
     position: relative;
     display: flex;
@@ -56,6 +56,7 @@ header {
     align-items: center;
     padding: 10px 0;
     height: 60px;
+    flex-shrink: 0;
 }
 
 h1 {
@@ -104,8 +105,8 @@ main {
     position: relative;
     display: flex;
     flex-direction: column;
-    /* justify-content: space-between; */
-    /* 下部に余裕を持たせる */
+    min-height: 0;
+    justify-content: space-between;
 }
 
 /* ピラミッドエリア */
@@ -252,6 +253,32 @@ main {
     text-align: center;
     font-size: 0.8rem;
     color: rgba(255, 255, 255, 0.7);
+    white-space: nowrap;
+}
+
+.stock-pile-container .label {
+    background: rgba(230, 126, 34, 0.9);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: bold;
+    bottom: -32px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    animation: bounceAttention 1.5s infinite;
+}
+
+@keyframes bounceAttention {
+
+    0%,
+    100% {
+        transform: translateX(-50%) translateY(0);
+    }
+
+    50% {
+        transform: translateX(-50%) translateY(-5px);
+    }
 }
 
 .card-placeholder {
@@ -367,36 +394,72 @@ main {
     }
 }
 
-/* 応援キャラクターエリア */
-.cheer-container {
-    position: absolute;
-    bottom: 140px;
-    /* デッキの上 */
-    left: 0;
-    width: 100%;
-    height: 0;
-    /* 高さは取らない（はみ出し配置） */
-    pointer-events: none;
-    /* クリック透過 */
-    z-index: 60;
+/* 画面の高さに応じた調整（見切れ防止） */
+@media (max-height: 800px) {
+    .pyramid-container {
+        transform: scale(0.9);
+        transform-origin: top center;
+        margin-top: 5px;
+    }
+
+    .deck-area {
+        margin-bottom: 5px;
+        height: 100px;
+    }
+
+    .cheer-container {
+        height: 80px;
+    }
+
+    .character-box {
+        width: 70px;
+        height: 70px;
+    }
 }
 
-.character-box {
-    position: absolute;
-    bottom: 0;
-    width: 100px;
+@media (max-height: 650px) {
+    .pyramid-container {
+        transform: scale(0.75);
+        transform-origin: top center;
+    }
+
+    .deck-area {
+        height: 85px;
+    }
+
+    header {
+        height: 50px;
+    }
+}
+
+/* 応援キャラクターエリア */
+.cheer-container {
+    position: relative;
+    width: 100%;
     height: 100px;
+    pointer-events: none;
+    z-index: 60;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: flex-end;
 }
 
+.character-box {
+    position: relative;
+    width: 90px;
+    height: 90px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    pointer-events: auto;
+}
+
 .character-box.left {
-    left: 10px;
+    margin-left: 10px;
 }
 
 .character-box.right {
-    right: 10px;
+    margin-right: 10px;
 }
 
 .character-img {
