@@ -26,11 +26,18 @@
     -webkit-tap-highlight-color: transparent;
 }
 
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+
 body {
     font-family: var(--font-main);
     background-color: var(--bg-color);
     color: white;
-    height: 100dvh;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -41,7 +48,7 @@ body {
 .game-container {
     width: 100%;
     max-width: 600px;
-    height: 100dvh;
+    height: 100%;
     background-color: var(--table-color);
     position: relative;
     display: flex;
@@ -108,6 +115,7 @@ main {
     flex-direction: column;
     min-height: 0;
     justify-content: space-between;
+    overflow: hidden;
 }
 
 /* ピラミッドエリア */
@@ -411,6 +419,7 @@ main {
 
     .cheer-container {
         height: 80px;
+        bottom: 105px !important;
     }
 
     .character-box {
@@ -428,10 +437,12 @@ main {
 
     .deck-area {
         height: 90px;
+        margin-bottom: 5px;
     }
 
     .cheer-container {
         height: 65px;
+        bottom: 95px !important;
     }
 
     .character-box {
@@ -454,12 +465,13 @@ main {
 
     .deck-area {
         height: 75px;
-        margin-bottom: 25px;
+        margin-bottom: 10px;
         /* 下部ナビバー考慮 */
     }
 
     .cheer-container {
         height: 50px;
+        bottom: 85px !important;
     }
 
     .character-box {
@@ -474,7 +486,10 @@ main {
 
 /* 応援キャラクターエリア */
 .cheer-container {
-    position: relative;
+    position: absolute;
+    bottom: 130px;
+    /* deck-areaの上部に配置 */
+    left: 0;
     width: 100%;
     height: 100px;
     pointer-events: none;
