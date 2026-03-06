@@ -421,7 +421,7 @@ main {
 
     .cheer-container {
         height: 80px;
-        margin-top: -25px;
+        margin-top: 0px;
     }
 
     .character-box {
@@ -444,7 +444,7 @@ main {
 
     .cheer-container {
         height: 65px;
-        margin-top: -20px;
+        margin-top: 0px;
     }
 
     .character-box {
@@ -471,7 +471,7 @@ main {
 
     .cheer-container {
         height: 50px;
-        margin-top: -15px;
+        margin-top: 0px;
     }
 
     .character-box {
@@ -494,7 +494,7 @@ main {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    margin-top: -30px;
+    margin-top: 5px;
     flex-shrink: 0;
 }
 
