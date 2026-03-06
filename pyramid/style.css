@@ -115,8 +115,10 @@ main {
     display: flex;
     flex-direction: column;
     min-height: 0;
-    justify-content: space-between;
-    overflow: hidden;
+    justify-content: flex-start;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 20px;
 }
 
 /* ピラミッドエリア */
@@ -124,10 +126,9 @@ main {
     position: relative;
     /* カードの絶対配置の基準 */
     width: 100%;
-    min-height: 400px;
+    height: 410px;
     /* カード配置エリア確保 */
-    /* 高さはカード配置に応じて確保したいが、とりあえずフレキシブルに */
-    flex-grow: 1;
+    flex-shrink: 0;
     margin-top: 20px;
 }
 
@@ -240,9 +241,10 @@ main {
     justify-content: center;
     align-items: center;
     gap: 40px;
-    margin-bottom: 20px;
+    margin-top: auto;
     position: relative;
     z-index: 50;
+    flex-shrink: 0;
     /* ピラミッドより手前に */
 }
 
@@ -409,18 +411,17 @@ main {
     .pyramid-container {
         transform: scale(0.9);
         transform-origin: top center;
-        margin-top: 5px;
-        min-height: 360px;
+        margin-top: 10px;
+        height: 360px;
     }
 
     .deck-area {
-        margin-bottom: 5px;
         height: 100px;
     }
 
     .cheer-container {
         height: 80px;
-        bottom: 105px !important;
+        margin-top: -25px;
     }
 
     .character-box {
@@ -433,17 +434,17 @@ main {
     .pyramid-container {
         transform: scale(0.8);
         transform-origin: top center;
-        min-height: 320px;
+        height: 320px;
+        margin-top: 5px;
     }
 
     .deck-area {
         height: 90px;
-        margin-bottom: 5px;
     }
 
     .cheer-container {
         height: 65px;
-        bottom: 95px !important;
+        margin-top: -20px;
     }
 
     .character-box {
@@ -460,19 +461,17 @@ main {
     .pyramid-container {
         transform: scale(0.65);
         transform-origin: top center;
-        min-height: 260px;
-        margin-bottom: -10px;
+        height: 260px;
+        margin-top: 0px;
     }
 
     .deck-area {
         height: 75px;
-        margin-bottom: 10px;
-        /* 下部ナビバー考慮 */
     }
 
     .cheer-container {
         height: 50px;
-        bottom: 85px !important;
+        margin-top: -15px;
     }
 
     .character-box {
@@ -487,17 +486,16 @@ main {
 
 /* 応援キャラクターエリア */
 .cheer-container {
-    position: absolute;
-    bottom: 130px;
-    /* deck-areaの上部に配置 */
-    left: 0;
+    position: relative;
     width: 100%;
-    height: 100px;
+    height: 90px;
     pointer-events: none;
     z-index: 60;
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
+    margin-top: -30px;
+    flex-shrink: 0;
 }
 
 .character-box {
